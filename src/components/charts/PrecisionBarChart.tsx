@@ -60,7 +60,7 @@ export default function PrecisionBarChart({ data }: Props) {
             border: '1px solid #e5e7eb',
             fontSize: 12,
           }}
-          formatter={(value: number) => [`${value}%`, 'Maîtrise']}
+          formatter={(value) => [`${value}%`, 'Maîtrise']}
           labelFormatter={(label) => `Compétence : ${label}`}
         />
         <Bar dataKey="pct" radius={[6, 6, 0, 0]} maxBarSize={40}>
