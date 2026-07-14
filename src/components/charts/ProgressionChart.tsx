@@ -54,7 +54,7 @@ export default function ProgressionChart({ data }: Props) {
             border: '1px solid #e5e7eb',
             fontSize: 12,
           }}
-          formatter={(value: number, name: string) => {
+          formatter={(value, name) => {
             if (name === 'XP') return [`${value} XP`, 'XP gagné']
             if (name === 'Sessions') return [value, 'Sessions']
             if (name === 'Précision') return [`${value}%`, 'Précision moy.']
