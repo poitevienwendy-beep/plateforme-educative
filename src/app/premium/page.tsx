@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import PremiumCheckout from './PremiumCheckout'
 
@@ -23,15 +22,10 @@ const PREMIUM_FEATURES = [
 export default async function PremiumPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login?next=/premium')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('plan')
-    .eq('id', user.id)
-    .single()
-
-  const isPremium = profile?.plan === 'premium'
+  const isPremium = user
+    ? (await supabase.from('profiles').select('plan').eq('id', user.id).single()).data?.plan === 'premium'
+    : false
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(135deg,#f8f9ff 0%,#fefce8 100%)' }}>
