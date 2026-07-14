@@ -159,6 +159,7 @@ export default function SessionPage({
     setSelected(option)
     const q = questions[current]
     const isCorrect = option === q.content.answer
+    const responseMs = Date.now() - startTimeRef.current
     if (isCorrect) {
       correctCount.current++
       setCombo((c) => c + 1)
@@ -199,7 +200,6 @@ export default function SessionPage({
     }
 
     const supabase = createClient()
-    const responseMs = Date.now() - startTimeRef.current
 
     // record_attempt — mis en queue si hors-ligne
     const attemptParams = {
