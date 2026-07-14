@@ -3,9 +3,7 @@ import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Stripe from 'stripe'
 
-// Désactiver le body parsing automatique de Next.js — Stripe vérifie la signature sur le raw body
-export const config = { api: { bodyParser: false } }
-
+// App Router lit le body via req.text() — pas besoin de désactiver bodyParser
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? ''
 
 export async function POST(req: NextRequest) {
