@@ -15,16 +15,12 @@ export default function ResetPasswordPage() {
   const [done, setDone] = useState(false)
 
   useEffect(() => {
-    // Le lien courriel Supabase inclut un "code" (flux PKCE)
-    const code = new URLSearchParams(window.location.search).get('code')
-    if (!code) {
-      setError('Lien invalide. Demandez un nouveau lien de réinitialisation.')
-      return
-    }
+    // La route /auth/callback a déjà échangé le code/token et établi la session.
+    // On vérifie simplement qu'une session active existe.
     const supabase = createClient()
-    supabase.auth.exchangeCodeForSession(code).then(({ error: exchangeError }) => {
-      if (exchangeError) {
-        setError('Ce lien est expiré ou déjà utilisé. Demandez-en un nouveau.')
+    supabase.auth.getSession().then(({ data: { session }, error: sessionError }) => {
+      if (sessionError || !session) {
+        setError('Lien invalide ou expiré. Demandez un nouveau lien de réinitialisation.')
       } else {
         setReady(true)
       }
