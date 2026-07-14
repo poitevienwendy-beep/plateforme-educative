@@ -109,7 +109,7 @@ export default async function PremiumPage() {
         <div className="mt-10 text-center text-sm text-gray-400">
           🔒 Paiement sécurisé par Stripe &nbsp;·&nbsp;
           Annulation à tout moment &nbsp;·&nbsp;
-          TPS + TVQ incluses
+          + TPS et TVQ applicables
         </div>
       </main>
     </div>

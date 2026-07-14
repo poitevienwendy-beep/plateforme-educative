@@ -94,7 +94,7 @@ export default function PremiumCheckout() {
       </button>
 
       <p className="text-center text-xs text-gray-400 mt-3">
-        Annulation à tout moment · TPS + TVQ incluses
+        Annulation à tout moment · + TPS et TVQ applicables
       </p>
     </div>
   )
