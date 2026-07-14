@@ -19,7 +19,7 @@ export default function ForgotPasswordPage() {
       redirectTo: `${window.location.origin}/auth/reset-password`,
     })
     if (resetError) {
-      setError('Erreur lors de l\'envoi. Vérifiez l\'adresse courriel.')
+      setError(resetError.message)
       setLoading(false)
       return
     }
