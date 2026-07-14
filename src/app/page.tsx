@@ -80,26 +80,33 @@ export default function HomePage() {
     <div className="min-h-screen bg-white">
 
       {/* ── Nav ── */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 md:px-10 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-extrabold text-indigo-600 tracking-tight">Eva Étude</span>
-          <span className="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-full">Québec</span>
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 md:px-10 py-3 md:py-4 flex items-center justify-between">
+        {/* Logo */}
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-base sm:text-xl font-extrabold text-indigo-600 tracking-tight whitespace-nowrap">Eva Étude</span>
+          <span className="hidden sm:inline text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-full shrink-0">Québec</span>
         </div>
+
+        {/* Liens desktop uniquement */}
         <div className="hidden md:flex items-center gap-8 text-sm text-gray-500 font-medium">
           <a href="#fonctionnalites" className="hover:text-gray-900 transition-colors">Fonctionnalités</a>
           <a href="#comment-ca-marche" className="hover:text-gray-900 transition-colors">Comment ça marche</a>
           <Link href="/premium" className="hover:text-indigo-600 transition-colors">Tarifs</Link>
         </div>
-        <div className="flex items-center gap-3">
-          <Link href="/auth/login" className="text-sm text-gray-600 hover:text-gray-900 font-semibold transition-colors">
+
+        {/* Boutons */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* "Se connecter" caché sur très petit écran */}
+          <Link href="/auth/login" className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 font-semibold transition-colors whitespace-nowrap">
             Se connecter
           </Link>
           <Link
             href="/auth/signup"
-            className="text-sm font-bold px-5 py-2.5 rounded-xl text-white transition-all hover:scale-105 hover:shadow-lg"
+            className="text-sm font-bold px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl text-white transition-all hover:scale-105 hover:shadow-lg whitespace-nowrap"
             style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
           >
-            Essai gratuit →
+            <span className="sm:hidden">Commencer →</span>
+            <span className="hidden sm:inline">Essai gratuit →</span>
           </Link>
         </div>
       </nav>
