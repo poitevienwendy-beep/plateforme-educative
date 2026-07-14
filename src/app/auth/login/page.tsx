@@ -11,6 +11,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Read ?next= from URL safely (avoids Suspense requirement of useSearchParams)
+  // Safety: only allow relative paths (no open-redirect)
+  const [next] = useState(() => {
+    if (typeof window === 'undefined') return '/dashboard'
+    const raw = new URLSearchParams(window.location.search).get('next') ?? ''
+    return raw.startsWith('/') ? raw : '/dashboard'
+  })
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -24,7 +31,7 @@ export default function LoginPage() {
       return
     }
     router.refresh()
-    router.push('/dashboard')
+    router.push(next)
   }
 
   return (

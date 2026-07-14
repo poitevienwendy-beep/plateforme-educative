@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function PremiumCheckout() {
   const [interval, setInterval] = useState<'monthly' | 'annual'>('annual')
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   async function handleCheckout() {
     setLoading(true)
@@ -15,7 +17,15 @@ export default function PremiumCheckout() {
         body: JSON.stringify({ interval }),
       })
       const { url, error } = await res.json()
-      if (error) { alert(error); setLoading(false); return }
+      if (error) {
+        if (res.status === 401) {
+          router.push('/auth/signup?next=/premium')
+          return
+        }
+        alert(error)
+        setLoading(false)
+        return
+      }
       window.location.href = url
     } catch {
       alert('Erreur de connexion. Réessayez.')

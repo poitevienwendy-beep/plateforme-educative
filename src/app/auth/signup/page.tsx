@@ -7,6 +7,13 @@ import Link from 'next/link'
 
 export default function SignUpPage() {
   const router = useRouter()
+  // Read ?next= from URL safely (avoids Suspense requirement of useSearchParams)
+  // Safety: only allow relative paths (no open-redirect)
+  const [next] = useState(() => {
+    if (typeof window === 'undefined') return '/dashboard'
+    const raw = new URLSearchParams(window.location.search).get('next') ?? ''
+    return raw.startsWith('/') ? raw : '/dashboard'
+  })
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [firstName, setFirstName] = useState('')
@@ -39,7 +46,7 @@ export default function SignUpPage() {
       })
       if (profileError) console.error('Erreur création profil:', profileError)
     }
-    router.push('/dashboard')
+    router.push(next)
   }
 
   const pwValid = password.length >= 8 && password === confirm
