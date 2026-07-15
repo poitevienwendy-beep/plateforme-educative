@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
           <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center">
             <span className="text-white font-extrabold">E</span>
           </div>
-          <span className="font-extrabold text-lg text-gray-900">Eva Etude</span>
+          <span className="font-extrabold text-lg text-gray-900">Educa+</span>
         </div>
 
         <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Nouveau mot de passe</h1>
@@ -108,7 +108,7 @@ export default function ResetPasswordPage() {
                 required
                 minLength={8}
                 placeholder="8 caractères minimum"
-                className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
               />
               {password.length > 0 && (
                 <div className="flex items-center gap-1.5 mt-1.5">
@@ -155,8 +155,4 @@ export default function ResetPasswordPage() {
               {loading ? 'Mise à jour…' : 'Réinitialiser le mot de passe →'}
             </button>
           </form>
-        )}
-      </div>
-    </div>
-  )
-}
+ 

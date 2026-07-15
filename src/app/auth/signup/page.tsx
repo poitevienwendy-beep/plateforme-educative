@@ -63,7 +63,7 @@ export default function SignUpPage() {
           <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
             <span className="text-white font-extrabold text-lg">E</span>
           </div>
-          <span className="text-white font-extrabold text-xl tracking-tight">Eva Etude</span>
+          <span className="text-white font-extrabold text-xl tracking-tight">Educa+</span>
         </div>
 
         {/* Contenu central */}
@@ -126,7 +126,7 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        <p className="text-white/40 text-xs">© 2026 Eva Etude — Conçu pour le Québec 🌸</p>
+        <p className="text-white/40 text-xs">© 2026 EducaPlus — Conçu pour le Québec 🌸</p>
       </div>
 
       {/* ── Panneau droit (formulaire) ─────────────────────────── */}
@@ -138,7 +138,7 @@ export default function SignUpPage() {
             <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center">
               <span className="text-white font-extrabold">E</span>
             </div>
-            <span className="font-extrabold text-lg text-gray-900">Eva Etude</span>
+            <span className="font-extrabold text-lg text-gray-900">Educa+</span>
           </div>
 
           <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Créer un compte</h1>

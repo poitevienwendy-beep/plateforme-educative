@@ -187,7 +187,7 @@ export default async function EleveDashboardPage({
       {/* Header */}
       <header className="bg-white/80 backdrop-blur border-b border-gray-100 px-5 py-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2">
-          <span className="text-base font-bold text-indigo-600">Eva Étude</span>
+          <span className="text-base font-bold text-indigo-600">Educa+</span>
           <span className="text-xs bg-indigo-100 text-indigo-600 font-semibold px-2 py-0.5 rounded-full">Québec</span>
         </div>
         <Link href="/dashboard" className="text-xs text-gray-400 hover:text-gray-600">← Mode parent</Link>

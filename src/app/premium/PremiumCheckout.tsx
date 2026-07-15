@@ -47,7 +47,7 @@ export default function PremiumCheckout() {
               Créez votre compte gratuit d&apos;abord
             </h2>
             <p className="text-gray-500 text-sm mb-6">
-              Pour activer votre abonnement Premium, vous devez d&apos;abord créer un compte Eva Étude.
+              Pour activer votre abonnement Premium, vous devez d&apos;abord créer un compte EducaPlus.
               C&apos;est gratuit et prend moins d&apos;une minute !
             </p>
             <div className="space-y-3">

@@ -47,7 +47,7 @@ export default function LoginPage() {
             <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
               <span className="text-white font-extrabold text-lg">E</span>
             </div>
-            <span className="text-white font-extrabold text-xl tracking-tight">Eva Etude</span>
+            <span className="text-white font-extrabold text-xl tracking-tight">Educa+</span>
           </div>
         </div>
 
@@ -111,7 +111,7 @@ export default function LoginPage() {
         </div>
 
         {/* Bas de page */}
-        <p className="text-white/40 text-xs">© 2026 Eva Etude — Conçu pour le Québec 🌸</p>
+        <p className="text-white/40 text-xs">© 2026 EducaPlus — Conçu pour le Québec 🌸</p>
       </div>
 
       {/* ── Panneau droit (formulaire) ─────────────────────────── */}
@@ -123,7 +123,7 @@ export default function LoginPage() {
             <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center">
               <span className="text-white font-extrabold">E</span>
             </div>
-            <span className="font-extrabold text-lg text-gray-900">Eva Etude</span>
+            <span className="font-extrabold text-lg text-gray-900">Educa+</span>
           </div>
 
           <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Bon retour !</h1>
@@ -140,7 +140,7 @@ export default function LoginPage() {
                 onChange={e => setEmail(e.target.value)}
                 required
                 placeholder="vous@exemple.com"
-                className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
               />
             </div>
 
@@ -159,7 +159,7 @@ export default function LoginPage() {
                 onChange={e => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
               />
             </div>
 
@@ -181,10 +181,3 @@ export default function LoginPage() {
             Pas encore de compte ?{' '}
             <Link href="/auth/signup" className="text-indigo-600 font-semibold hover:underline">
               Créer un compte gratuitement
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}

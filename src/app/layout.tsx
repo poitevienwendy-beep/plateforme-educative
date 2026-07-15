@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Eva Étude — Apprentissage adaptatif pour le Québec",
+  title: "EducaPlus — Apprentissage adaptatif pour le Québec",
   description: "Plateforme d'apprentissage autonome et adaptatif pour les élèves québécois. Suivi parental hebdomadaire, parcours guidé et exercices alignés sur le PFEQ.",
 };
 
