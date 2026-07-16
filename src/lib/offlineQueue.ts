@@ -1,5 +1,5 @@
 /**
- * File d'attente hors-ligne — EducaPlus PRD v2.0 (Section 3)
+ * File d'attente hors-ligne — Savoila PRD v2.0 (Section 3)
  *
  * Les appels RPC Supabase qui échouent (réseau coupé) sont mis en queue
  * dans localStorage. La bannière hors-ligne les rejoue dès la reconnexion.

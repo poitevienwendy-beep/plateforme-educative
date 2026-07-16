@@ -47,7 +47,7 @@ export default function LoginPage() {
             <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
               <span className="text-white font-extrabold text-lg">E</span>
             </div>
-            <span className="text-white font-extrabold text-xl tracking-tight">Educa+</span>
+            <span className="text-white font-extrabold text-xl tracking-tight">Savoila</span>
           </div>
         </div>
 
@@ -111,7 +111,7 @@ export default function LoginPage() {
         </div>
 
         {/* Bas de page */}
-        <p className="text-white/40 text-xs">© 2026 EducaPlus — Conçu pour le Québec 🌸</p>
+        <p className="text-white/40 text-xs">© 2026 Savoila — Conçu pour le Québec 🌸</p>
       </div>
 
       {/* ── Panneau droit (formulaire) ─────────────────────────── */}
@@ -121,9 +121,9 @@ export default function LoginPage() {
           {/* Logo mobile uniquement */}
           <div className="flex items-center gap-2 mb-8 lg:hidden">
             <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-extrabold">E</span>
+              <span className="text-white font-extrabold">S</span>
             </div>
-            <span className="font-extrabold text-lg text-gray-900">Educa+</span>
+            <span className="font-extrabold text-lg text-gray-900">Savoila</span>
           </div>
 
           <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Bon retour !</h1>

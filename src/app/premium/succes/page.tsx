@@ -7,7 +7,7 @@ export default function SuccesPage() {
       <div className="max-w-md w-full text-center bg-white rounded-3xl shadow-xl border border-emerald-100 p-10">
         <div className="text-6xl mb-4">🎉</div>
         <h1 className="text-2xl font-extrabold text-gray-900 mb-2">
-          Bienvenue dans Educa+ Premium !
+          Bienvenue dans Savoila Premium !
         </h1>
         <p className="text-gray-500 mb-8">
           Votre abonnement est actif. Toutes les compétences sont maintenant débloquées

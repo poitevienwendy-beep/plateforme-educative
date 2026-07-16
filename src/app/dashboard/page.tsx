@@ -81,7 +81,7 @@ export default async function DashboardPage() {
       {/* Header compact */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg font-bold text-indigo-600">Educa+</span>
+          <span className="text-lg font-bold text-indigo-600">Savoila</span>
           <span className="text-xs bg-indigo-100 text-indigo-600 font-semibold px-2 py-0.5 rounded-full">Québec</span>
         </div>
         <div className="flex items-center gap-4">

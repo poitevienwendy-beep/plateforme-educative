@@ -101,7 +101,7 @@ export function PremiumLockedCard({ skillName }: { skillName: string }) {
             </div>
             <p className="text-sm text-gray-600 mb-4">
               <span className="font-bold text-gray-800">{skillName}</span> fait partie du plan{' '}
-              <span className="font-bold text-amber-600">Educa+ Premium</span>.
+              <span className="font-bold text-amber-600">Savoila Premium</span>.
             </p>
             <div className="bg-amber-50 rounded-xl p-3 mb-4 space-y-2">
               <p className="text-xs font-bold text-amber-700 uppercase tracking-wide">Comment y accéder</p>

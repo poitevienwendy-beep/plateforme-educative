@@ -62,9 +62,9 @@ export default async function RapportPublicPage({
         <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl p-8 text-center text-white mb-5 shadow-lg">
           <div className="flex items-center justify-center gap-2 mb-5">
             <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center">
-              <span className="text-white font-extrabold">E</span>
+              <span className="text-white font-extrabold">S</span>
             </div>
-            <span className="font-extrabold text-lg">Educa+</span>
+            <span className="font-extrabold text-lg">Savoila</span>
           </div>
           <div className="text-4xl mb-3">📚</div>
           <h1 className="text-2xl font-extrabold mb-1">Rapport hebdomadaire</h1>
@@ -138,7 +138,7 @@ export default async function RapportPublicPage({
             className="inline-block bg-indigo-600 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition">
             Accéder au tableau de bord →
           </Link>
-          <p className="text-[10px] text-gray-300 mt-4">EducaPlus — Plateforme éducative adaptative pour le Québec</p>
+          <p className="text-[10px] text-gray-300 mt-4">Savoila — Plateforme éducative adaptative pour le Québec</p>
         </div>
 
       </div>

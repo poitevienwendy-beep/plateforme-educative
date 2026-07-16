@@ -54,9 +54,9 @@ export default function ForgotPasswordPage() {
         {/* Logo */}
         <div className="flex items-center gap-2 mb-8">
           <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center">
-            <span className="text-white font-extrabold">E</span>
+            <span className="text-white font-extrabold">S</span>
           </div>
-          <span className="font-extrabold text-lg text-gray-900">Educa+</span>
+          <span className="font-extrabold text-lg text-gray-900">Savoila</span>
         </div>
 
         <h1 className="text-2xl font-extrabold text-gray-900 mb-1">Mot de passe oublié ?</h1>

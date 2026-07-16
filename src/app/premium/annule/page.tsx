@@ -27,7 +27,7 @@ export default function AnnulePage() {
 
         <p className="text-xs text-gray-400 mt-6">
           Des questions ? Écrivez-nous à&nbsp;
-          <a href="mailto:support@evaetude.ca" className="underline">support@evaetude.ca</a>
+          <a href="mailto:support@savoila.com" className="underline">support@savoila.com</a>
         </p>
       </div>
     </div>

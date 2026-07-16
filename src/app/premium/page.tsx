@@ -32,7 +32,7 @@ export default async function PremiumPage() {
       {/* Nav */}
       <header className="bg-white/80 backdrop-blur border-b border-gray-100 px-5 md:px-8 py-4 flex items-center justify-between">
         <Link href="/dashboard" className="font-bold text-indigo-600 text-lg">
-          📚 Educa+
+          📚 Savoila
         </Link>
         <Link href="/dashboard" className="text-sm text-gray-500 hover:underline">
           ← Retour
@@ -59,7 +59,7 @@ export default async function PremiumPage() {
           <div className="max-w-md mx-auto text-center bg-white rounded-2xl border border-emerald-200 shadow-md p-8">
             <div className="text-5xl mb-3">🌟</div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">Vous êtes déjà Premium !</h2>
-            <p className="text-gray-500 mb-6">Profitez de toutes les fonctionnalités dEducaPlus.</p>
+            <p className="text-gray-500 mb-6">Profitez de toutes les fonctionnalités dSavoila.</p>
             <form action="/api/stripe/portal" method="POST">
               <button type="submit"
                 className="w-full border-2 border-indigo-600 text-indigo-600 py-3 rounded-xl font-semibold hover:bg-indigo-50">

@@ -83,7 +83,7 @@ export default function HomePage() {
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 md:px-10 py-3 md:py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-base sm:text-xl font-extrabold text-indigo-600 tracking-tight whitespace-nowrap">Educa+</span>
+          <span className="text-base sm:text-xl font-extrabold text-indigo-600 tracking-tight whitespace-nowrap">Savoila</span>
           <span className="hidden sm:inline text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-full shrink-0">Québec</span>
         </div>
 
@@ -268,7 +268,7 @@ export default function HomePage() {
             Prêt à accompagner<br />la réussite de votre enfant ?
           </h2>
           <p className="text-indigo-200 mb-10 text-lg">
-            Rejoignez des familles québécoises qui font confiance à EducaPlus
+            Rejoignez des familles québécoises qui font confiance à Savoila
             pour le suivi scolaire de leur enfant.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -295,16 +295,16 @@ export default function HomePage() {
       <footer className="border-t border-gray-100 px-6 md:px-10 py-8">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-extrabold text-indigo-600">Educa+</span>
+            <span className="font-extrabold text-indigo-600">Savoila</span>
             <span className="text-gray-300">·</span>
             <span className="text-sm text-gray-400">Plateforme éducative québécoise</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-gray-400">
             <Link href="/premium" className="hover:text-gray-600 transition-colors">Tarifs</Link>
             <Link href="/politique-confidentialite" className="hover:text-gray-600 transition-colors">Confidentialité</Link>
-            <a href="mailto:support@evaetude.ca" className="hover:text-gray-600 transition-colors">Support</a>
+            <a href="mailto:support@savoila.com" className="hover:text-gray-600 transition-colors">Support</a>
           </div>
-          <p className="text-xs text-gray-400">© 2026 EducaPlus · Alignée sur le PFEQ</p>
+          <p className="text-xs text-gray-400">© 2026 Savoila · Alignée sur le PFEQ</p>
         </div>
       </footer>
 

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'Politique de confidentialité & Conditions d\'utilisation — EducaPlus',
+  title: 'Politique de confidentialité & Conditions d\'utilisation — Savoila',
 }
 
 export default function PolitiqueConfidentialitePage() {
@@ -28,7 +28,7 @@ export default function PolitiqueConfidentialitePage() {
         {/* Intro */}
         <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5">
           <p className="text-sm text-indigo-800 leading-relaxed">
-            EducaPlus s&apos;engage à protéger la vie privée de vos enfants et la vôtre.
+            Savoila s&apos;engage à protéger la vie privée de vos enfants et la vôtre.
             Cette politique explique quelles informations nous collectons, pourquoi,
             et comment vous pouvez exercer vos droits conformément à la{' '}
             <strong>Loi sur la protection des renseignements personnels dans le secteur privé</strong>{' '}
@@ -38,11 +38,11 @@ export default function PolitiqueConfidentialitePage() {
 
         <Section title="1. Responsable de la protection des renseignements personnels">
           <p>
-            La personne responsable de la protection des renseignements personnels au sein d&apos;EducaPlus est
+            La personne responsable de la protection des renseignements personnels au sein d&apos;Savoila est
             le fondateur et administrateur principal. Pour toute question, vous pouvez nous contacter à :
           </p>
           <div className="bg-gray-100 rounded-xl p-4 mt-3 text-sm font-mono">
-            confidentialite@evaetude.ca
+            confidentialite@savoila.com
           </div>
         </Section>
 
@@ -130,8 +130,8 @@ export default function PolitiqueConfidentialitePage() {
           </div>
           <p className="mt-4 text-sm text-gray-600">
             Pour exercer vos droits, écrivez-nous à{' '}
-            <a href="mailto:confidentialite@evaetude.ca" className="text-indigo-600 underline">
-              confidentialite@evaetude.ca
+            <a href="mailto:confidentialite@savoila.com" className="text-indigo-600 underline">
+              confidentialite@savoila.com
             </a>
             . Nous répondrons dans un délai de 30 jours.
           </p>
@@ -139,7 +139,7 @@ export default function PolitiqueConfidentialitePage() {
 
         <Section title="8. Cookies">
           <p>
-            EducaPlus utilise uniquement des cookies techniques essentiels au fonctionnement
+            Savoila utilise uniquement des cookies techniques essentiels au fonctionnement
             de la plateforme (session d&apos;authentification). Nous n&apos;utilisons pas de
             cookies publicitaires ni de traceurs tiers.
           </p>
@@ -169,7 +169,7 @@ export default function PolitiqueConfidentialitePage() {
           <div className="space-y-6 text-sm text-gray-700 leading-relaxed">
             <div>
               <h3 className="font-bold text-gray-800 mb-1">1. Accès au service</h3>
-              <p>EducaPlus est réservé aux parents résidant au Canada souhaitant soutenir l&apos;apprentissage
+              <p>Savoila est réservé aux parents résidant au Canada souhaitant soutenir l&apos;apprentissage
               de leurs enfants du niveau primaire et secondaire. L&apos;inscription est gratuite pour les
               3 premières compétences. L&apos;accès complet requiert un abonnement Premium.</p>
             </div>
@@ -183,7 +183,7 @@ export default function PolitiqueConfidentialitePage() {
             <div>
               <h3 className="font-bold text-gray-800 mb-1">3. Propriété intellectuelle</h3>
               <p>L&apos;ensemble du contenu pédagogique, des algorithmes, des textes et des interfaces
-              d&apos;EducaPlus est la propriété exclusive d&apos;EducaPlus. Toute reproduction sans autorisation est interdite.</p>
+              d&apos;Savoila est la propriété exclusive d&apos;Savoila. Toute reproduction sans autorisation est interdite.</p>
             </div>
 
             <div>
@@ -195,7 +195,7 @@ export default function PolitiqueConfidentialitePage() {
 
             <div>
               <h3 className="font-bold text-gray-800 mb-1">5. Limitation de responsabilité</h3>
-              <p>EducaPlus est un outil de soutien scolaire et ne remplace pas l&apos;enseignement en classe
+              <p>Savoila est un outil de soutien scolaire et ne remplace pas l&apos;enseignement en classe
               ni le suivi d&apos;un professionnel de l&apos;éducation. Nous ne garantissons pas de résultats
               scolaires spécifiques.</p>
             </div>
@@ -211,8 +211,8 @@ export default function PolitiqueConfidentialitePage() {
         {/* Footer */}
         <div className="bg-gray-100 rounded-2xl p-5 text-center text-sm text-gray-500">
           <p>Des questions ? Contactez-nous à{' '}
-            <a href="mailto:confidentialite@evaetude.ca" className="text-indigo-600 underline">
-              confidentialite@evaetude.ca
+            <a href="mailto:confidentialite@savoila.com" className="text-indigo-600 underline">
+              confidentialite@savoila.com
             </a>
           </p>
           <p className="mt-1">Commission d&apos;accès à l&apos;information du Québec (CAI) :{' '}

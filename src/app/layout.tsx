@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EducaPlus — Apprentissage adaptatif pour le Québec",
+  title: "Savoila — Apprentissage adaptatif pour le Québec",
   description: "Plateforme d'apprentissage autonome et adaptatif pour les élèves québécois. Suivi parental hebdomadaire, parcours guidé et exercices alignés sur le PFEQ.",
 };
 

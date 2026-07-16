@@ -24,7 +24,7 @@ function buildEmailHtml(data: {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rapport hebdomadaire EducaPlus</title>
+  <title>Rapport hebdomadaire Savoila</title>
 </head>
 <body style="margin:0;padding:0;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
@@ -36,7 +36,7 @@ function buildEmailHtml(data: {
           <td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:32px;text-align:center;">
             <div style="font-size:32px;margin-bottom:8px;">📚</div>
             <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">Rapport hebdomadaire</h1>
-            <p style="color:rgba(255,255,255,0.8);margin:4px 0 0;font-size:14px;">${student_name} — Educa+</p>
+            <p style="color:rgba(255,255,255,0.8);margin:4px 0 0;font-size:14px;">${student_name} — Savoila</p>
           </td>
         </tr>
 
@@ -111,8 +111,8 @@ function buildEmailHtml(data: {
         <tr>
           <td style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:16px;text-align:center;">
             <p style="margin:0;font-size:11px;color:#9ca3af;">
-              Educa+ — Plateforme éducative adaptative pour le Québec<br/>
-              Vous recevez cet courriel car vous êtes parent sur Educa+.
+              Savoila — Plateforme éducative adaptative pour le Québec<br/>
+              Vous recevez cet courriel car vous êtes parent sur Savoila.
             </p>
           </td>
         </tr>
@@ -197,9 +197,9 @@ export async function POST(req: NextRequest) {
     }
 
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: 'Educa+ <rapports@evaetude.ca>',
+      from: 'Savoila <rapports@savoila.com>',
       to: [user.email!],
-      subject: `Rapport hebdomadaire de ${safeReport.student_name} — Educa+`,
+      subject: `Rapport hebdomadaire de ${safeReport.student_name} — Savoila`,
       html,
     })
 
