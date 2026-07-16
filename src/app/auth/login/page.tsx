@@ -181,3 +181,10 @@ export default function LoginPage() {
             Pas encore de compte ?{' '}
             <Link href="/auth/signup" className="text-indigo-600 font-semibold hover:underline">
               Créer un compte gratuitement
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -136,20 +136,22 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const { data: link } = await supabase
-      .from('parent_student_links')
-      .select('student_id, student_name')
+      .from('parent_child_links')
+      .select('child_id, children!inner(display_name)')
       .eq('parent_id', user.id)
-      .eq('student_id', studentId)
+      .eq('child_id', studentId)
       .single()
     if (!link) return NextResponse.json({ error: 'Élève introuvable' }, { status: 404 })
 
+    const childName = (link as any).children?.display_name ?? 'Votre enfant'
+
     // Récupérer les données du rapport via admin client
     const admin = createAdminClient()
-    const { data: reportData } = await admin.rpc('get_weekly_report_data', { p_student_id: studentId })
+    const { data: reportData } = await admin.rpc('get_weekly_report_data', { p_child_id: studentId })
 
     // Fallback si la fonction RPC n'existe pas encore
     const safeReport = reportData ?? {
-      student_name: link.student_name ?? 'Votre enfant',
+      student_name: childName,
       xp_this_week: 0,
       sessions_this_week: 0,
       streak: 0,
@@ -168,7 +170,7 @@ export async function POST(req: NextRequest) {
     const { data: tokenRow, error: tokenError } = await admin
       .from('report_tokens')
       .insert({
-        student_id: studentId,
+        child_id: studentId,
         parent_id: user.id,
         week_start: weekStartStr,
         report_data: safeReport,

@@ -97,4 +97,9 @@ export default function ForgotPasswordPage() {
           <Link href="/auth/login" className="text-indigo-600 font-semibold hover:underline">
             ← Retour à la connexion
           </Link>
+        </p>
+      </div>
+    </div>
+  )
+}
    

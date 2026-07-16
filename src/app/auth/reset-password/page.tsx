@@ -155,4 +155,10 @@ export default function ResetPasswordPage() {
               {loading ? 'Mise à jour…' : 'Réinitialiser le mot de passe →'}
             </button>
           </form>
+        )}
+
+      </div>
+    </div>
+  )
+}
  
