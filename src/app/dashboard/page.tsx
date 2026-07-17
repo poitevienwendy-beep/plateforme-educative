@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { LogoutButton } from '@/components/LogoutButton'
 
 const GRADE_LABELS: Record<string, string> = {
   sec1: 'Secondaire 1',
@@ -88,9 +89,7 @@ export default async function DashboardPage() {
           <span className="text-sm text-gray-500">
             {profile?.first_name} {profile?.last_name}
           </span>
-          <form action="/auth/logout" method="post">
-            <button className="text-xs text-gray-400 hover:text-gray-600">Déconnexion</button>
-          </form>
+          <LogoutButton />
         </div>
       </header>
 
