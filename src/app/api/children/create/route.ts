@@ -1,10 +1,18 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import postgres from 'postgres'
+
+// Connexion directe PostgreSQL — bypass total PostgREST
+const sql = postgres(process.env.DATABASE_URL!, {
+  ssl: 'require',
+  max: 1, // Important pour serverless (Vercel)
+  idle_timeout: 20,
+  connect_timeout: 10,
+})
 
 export async function POST(request: Request) {
   try {
-    // 1. Vérifier que l'utilisateur est connecté
+    // 1. Vérifier l'auth via Supabase (fonctionne même avec PostgREST cassé)
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -12,50 +20,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
     }
 
-    // 2. Lire les données du body
+    // 2. Lire les données
     const { display_name, birth_year, grade_level } = await request.json()
 
     if (!display_name || !grade_level) {
       return NextResponse.json({ error: 'Champs manquants' }, { status: 400 })
     }
 
-    // 3. Utiliser l'admin client (bypass PostgREST schema cache + RLS)
-    const admin = createAdminClient()
+    // 3. Insertion directe SQL — aucun PostgREST impliqué
+    const [child] = await sql`
+      INSERT INTO children (display_name, birth_year, grade_level)
+      VALUES (${display_name}, ${birth_year ?? null}, ${grade_level})
+      RETURNING id
+    `
 
-    // Insérer l'enfant
-    const { data: child, error: childError } = await admin
-      .from('children')
-      .insert({
-        display_name,
-        birth_year: birth_year || null,
-        grade_level,
-      })
-      .select('id')
-      .single()
-
-    if (childError) {
-      console.error('Erreur insert children:', childError)
-      return NextResponse.json({ error: childError.message }, { status: 500 })
-    }
-
-    // Créer le lien parent-enfant
-    const { error: linkError } = await admin
-      .from('parent_child_links')
-      .insert({
-        parent_id: user.id,
-        child_id: child.id,
-      })
-
-    if (linkError) {
-      console.error('Erreur insert parent_child_links:', linkError)
-      // Rollback: supprimer l'enfant créé
-      await admin.from('children').delete().eq('id', child.id)
-      return NextResponse.json({ error: linkError.message }, { status: 500 })
-    }
+    await sql`
+      INSERT INTO parent_child_links (parent_id, child_id)
+      VALUES (${user.id}::uuid, ${child.id}::uuid)
+    `
 
     return NextResponse.json({ success: true, child_id: child.id })
-  } catch (err) {
-    console.error('Erreur inattendue:', err)
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Erreur serveur'
+    console.error('Erreur création enfant:', err)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
