@@ -86,9 +86,9 @@ export default async function DashboardPage() {
           <span className="text-xs bg-indigo-100 text-indigo-600 font-semibold px-2 py-0.5 rounded-full">Québec</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">
+          <Link href="/dashboard/profil" className="text-sm text-gray-500 hover:text-gray-700 transition">
             {profile?.first_name} {profile?.last_name}
-          </span>
+          </Link>
           <LogoutButton />
         </div>
       </header>

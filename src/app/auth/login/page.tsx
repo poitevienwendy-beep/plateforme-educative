@@ -26,7 +26,16 @@ export default function LoginPage() {
     const supabase = createClient()
     const { error: loginError } = await supabase.auth.signInWithPassword({ email, password })
     if (loginError) {
-      setError('Courriel ou mot de passe invalide')
+      const msg = loginError.message.toLowerCase()
+      if (msg.includes('invalid') || msg.includes('credentials') || msg.includes('password')) {
+        setError('Courriel ou mot de passe invalide.')
+      } else if (msg.includes('email not confirmed')) {
+        setError('Veuillez confirmer votre adresse courriel avant de vous connecter.')
+      } else if (msg.includes('rate limit') || msg.includes('too many')) {
+        setError('Trop de tentatives. Attendez quelques minutes avant de réessayer.')
+      } else {
+        setError('Erreur de connexion. Veuillez réessayer.')
+      }
       setLoading(false)
       return
     }

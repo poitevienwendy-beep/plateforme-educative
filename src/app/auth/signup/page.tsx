@@ -35,7 +35,22 @@ export default function SignUpPage() {
       password,
       options: { data: { role: 'parent' } },
     })
-    if (signUpError) { setError(signUpError.message); setLoading(false); return }
+    if (signUpError) {
+      const msg = signUpError.message.toLowerCase()
+      if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('user already')) {
+        setError('Un compte existe déjà avec cette adresse courriel. Connectez-vous ou réinitialisez votre mot de passe.')
+      } else if (msg.includes('password') && msg.includes('short')) {
+        setError('Le mot de passe est trop court (minimum 8 caractères).')
+      } else if (msg.includes('invalid email')) {
+        setError('L\'adresse courriel est invalide.')
+      } else if (msg.includes('rate limit') || msg.includes('too many')) {
+        setError('Trop de tentatives. Veuillez patienter quelques minutes avant de réessayer.')
+      } else {
+        setError('Erreur lors de la création du compte. Veuillez réessayer.')
+      }
+      setLoading(false)
+      return
+    }
     if (data.user) {
       const { error: profileError } = await supabase.from('profiles').insert({
         id: data.user.id,
