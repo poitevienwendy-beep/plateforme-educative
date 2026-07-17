@@ -35,30 +35,15 @@ export default function AjouterEnfantPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/auth/login'); return }
 
-    // Créer l'enfant
-    const { data: newChild, error: childError } = await supabase
-      .from('children')
-      .insert({
-        display_name: displayName,
-        birth_year: birthYear ? parseInt(birthYear) : null,
-        grade_level: gradeLevel,
-      })
-      .select('id')
-      .single()
+    // Créer l'enfant via fonction SECURITY DEFINER (contourne le cache PostgREST)
+    const { error: rpcError } = await supabase.rpc('ajouter_enfant', {
+      p_nom: displayName,
+      p_annee: birthYear ? parseInt(birthYear) : null,
+      p_niveau: gradeLevel,
+    })
 
-    if (childError) {
-      setError('Erreur lors de la création du profil : ' + childError.message)
-      setLoading(false)
-      return
-    }
-
-    // Lier l'enfant au parent
-    const { error: linkError } = await supabase
-      .from('parent_child_links')
-      .insert({ parent_id: user.id, child_id: newChild.id })
-
-    if (linkError) {
-      setError('Erreur lors de la liaison : ' + linkError.message)
+    if (rpcError) {
+      setError('Erreur lors de la création du profil : ' + rpcError.message)
       setLoading(false)
       return
     }
