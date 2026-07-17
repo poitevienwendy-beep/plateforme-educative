@@ -27,7 +27,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Champs manquants' }, { status: 400 })
     }
 
-    // 3. Insertion directe SQL — aucun PostgREST impliqué
+    // 3. S'assurer que le profil parent existe (FK parent_child_links → profiles)
+    await sql`
+      INSERT INTO profiles (id, plan)
+      VALUES (${user.id}::uuid, 'free')
+      ON CONFLICT (id) DO NOTHING
+    `
+
+    // 4. Insertion directe SQL — aucun PostgREST impliqué
     const [child] = await sql`
       INSERT INTO children (display_name, birth_year, grade_level)
       VALUES (${display_name}, ${birth_year ?? null}, ${grade_level})
