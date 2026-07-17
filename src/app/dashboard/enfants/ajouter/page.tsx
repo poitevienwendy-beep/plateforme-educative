@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
 const GRADE_OPTIONS = [
@@ -28,26 +27,31 @@ export default function AjouterEnfantPage() {
     setLoading(true)
     setError(null)
 
-    const supabase = createClient()
+    try {
+      const res = await fetch('/api/children/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          display_name: displayName,
+          birth_year: birthYear ? parseInt(birthYear) : null,
+          grade_level: gradeLevel,
+        }),
+      })
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/auth/login'); return }
+      const data = await res.json()
 
-    // Utilise la fonction SECURITY DEFINER originale (create_child_for_parent)
-    const { error: rpcError } = await supabase.rpc('create_child_for_parent', {
-      p_display_name: displayName,
-      p_birth_year: birthYear ? parseInt(birthYear) : null,
-      p_grade_level: gradeLevel,
-    })
+      if (!res.ok) {
+        setError('Erreur lors de la création du profil : ' + (data.error ?? res.statusText))
+        setLoading(false)
+        return
+      }
 
-    if (rpcError) {
-      setError('Erreur lors de la création du profil : ' + rpcError.message)
+      router.push('/dashboard')
+      router.refresh()
+    } catch {
+      setError('Erreur réseau. Vérifiez votre connexion et réessayez.')
       setLoading(false)
-      return
     }
-
-    router.push('/dashboard')
-    router.refresh()
   }
 
   return (
