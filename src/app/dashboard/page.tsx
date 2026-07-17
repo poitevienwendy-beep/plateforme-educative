@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { LogoutButton } from '@/components/LogoutButton'
+import { sql } from '@/lib/db'
 
 const GRADE_LABELS: Record<string, string> = {
   sec1: 'Secondaire 1',
@@ -31,13 +32,20 @@ export default async function DashboardPage() {
     .eq('id', user.id)
     .single()
 
-  // Récupérer les enfants liés à ce parent
-  const { data: links } = await supabase
-    .from('parent_child_links')
-    .select('child_id, children(*)')
-    .eq('parent_id', user.id)
-
-  const children = links?.map((l: any) => l.children).filter(Boolean) ?? []
+  // Récupérer les enfants liés à ce parent via postgres direct
+  // (parent_child_links et children absents du cache PostgREST)
+  const children = await sql<{
+    id: string
+    display_name: string
+    birth_year: number | null
+    grade_level: string
+  }[]>`
+    SELECT c.id, c.display_name, c.birth_year, c.grade_level
+    FROM parent_child_links pcl
+    JOIN children c ON c.id = pcl.child_id
+    WHERE pcl.parent_id = ${user.id}::uuid
+    ORDER BY c.created_at
+  `
 
   // Pour chaque enfant, récupérer la maîtrise moyenne
   const childIds = children.map((c: any) => c.id)

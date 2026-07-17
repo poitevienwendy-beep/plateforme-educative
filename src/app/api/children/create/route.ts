@@ -1,15 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import postgres from 'postgres'
-
-// Connexion directe PostgreSQL — pour tables absentes du cache PostgREST
-const sql = postgres(process.env.DATABASE_URL!, {
-  ssl: 'require',
-  max: 1,
-  idle_timeout: 20,
-  connect_timeout: 10,
-})
+import { sql } from '@/lib/db'
 
 export async function POST(request: Request) {
   try {
