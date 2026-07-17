@@ -29,125 +29,25 @@ export default function AjouterEnfantPage() {
     setError(null)
 
     const supabase = createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) { router.push('/auth/login'); return }
 
-    const gqlUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/graphql/v1`
-    const headers = {
-      'Content-Type': 'application/json',
-      'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      'Authorization': `Bearer ${session.access_token}`,
-    }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/auth/login'); return }
 
-    async function gql(query: string, variables: Record<string, unknown>) {
-      const res = await fetch(gqlUrl, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ query, variables }),
-      })
-      return res.json()
-    }
-
-    // ── Étape 1 : créer l'enfant via GraphQL (bypass PostgREST) ──
-    const r1 = await gql(`
-      mutation AddChild($display_name: String!, $birth_year: Int, $grade_level: String!) {
-        insertIntoChildrenCollection(objects: [{
-          display_name: $display_name
-          birth_year: $birth_year
-          grade_level: $grade_level
-        }]) {
-          records { id }
-        }
-      }
-    `, {
-      display_name: displayName,
-      birth_year: birthYear ? parseInt(birthYear) : null,
-      grade_level: gradeLevel,
+    // Utilise la fonction SECURITY DEFINER originale (create_child_for_parent)
+    const { error: rpcError } = await supabase.rpc('create_child_for_parent', {
+      p_display_name: displayName,
+      p_birth_year: birthYear ? parseInt(birthYear) : null,
+      p_grade_level: gradeLevel,
     })
 
-    if (r1.errors?.length) {
-      // Si snake_case échoue, essayer camelCase
-      if (r1.errors[0].message.includes('display_name') || r1.errors[0].message.includes('Unknown')) {
-        const r1b = await gql(`
-          mutation AddChild($displayName: String!, $birthYear: Int, $gradeLevel: String!) {
-            insertIntoChildrenCollection(objects: [{
-              displayName: $displayName
-              birthYear: $birthYear
-              gradeLevel: $gradeLevel
-            }]) {
-              records { id }
-            }
-          }
-        `, {
-          displayName,
-          birthYear: birthYear ? parseInt(birthYear) : null,
-          gradeLevel,
-        })
-        if (r1b.errors?.length) {
-          setError('Erreur : ' + r1b.errors[0].message)
-          setLoading(false)
-          return
-        }
-        const childIdB = r1b.data?.insertIntoChildrenCollection?.records?.[0]?.id
-        if (!childIdB) { setError('Erreur : profil non créé'); setLoading(false); return }
-        await finalizeLien(childIdB, session.user.id, gql)
-        return
-      }
-      setError('Erreur : ' + r1.errors[0].message)
+    if (rpcError) {
+      setError('Erreur lors de la création du profil : ' + rpcError.message)
       setLoading(false)
       return
     }
 
-    const childId = r1.data?.insertIntoChildrenCollection?.records?.[0]?.id
-    if (!childId) {
-      setError('Erreur : profil non créé')
-      setLoading(false)
-      return
-    }
-
-    await finalizeLien(childId, session.user.id, gql)
-
-    async function finalizeLien(cId: string, pId: string, gqlFn: typeof gql) {
-      // ── Étape 2 : lier au parent ──
-      const r2 = await gqlFn(`
-        mutation AddLink($parent_id: UUID!, $child_id: UUID!) {
-          insertIntoParent_child_linksCollection(objects: [{
-            parent_id: $parent_id
-            child_id: $child_id
-          }]) {
-            records { parent_id }
-          }
-        }
-      `, { parent_id: pId, child_id: cId })
-
-      if (r2.errors?.length) {
-        // Essayer camelCase si snake_case échoue
-        if (r2.errors[0].message.includes('parent_id') || r2.errors[0].message.includes('Unknown')) {
-          const r2b = await gqlFn(`
-            mutation AddLink($parentId: UUID!, $childId: UUID!) {
-              insertIntoParentChildLinksCollection(objects: [{
-                parentId: $parentId
-                childId: $childId
-              }]) {
-                records { parentId }
-              }
-            }
-          `, { parentId: pId, childId: cId })
-          if (r2b.errors?.length) {
-            setError('Erreur liaison : ' + r2b.errors[0].message)
-            setLoading(false)
-            return
-          }
-        } else {
-          setError('Erreur liaison : ' + r2.errors[0].message)
-          setLoading(false)
-          return
-        }
-      }
-
-      router.push('/dashboard')
-      router.refresh()
-    }
+    router.push('/dashboard')
+    router.refresh()
   }
 
   return (
