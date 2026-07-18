@@ -15,16 +15,31 @@ export default function ResetPasswordPage() {
   const [done, setDone] = useState(false)
 
   useEffect(() => {
-    // La route /auth/callback a déjà échangé le code/token et établi la session.
-    // On vérifie simplement qu'une session active existe.
     const supabase = createClient()
-    supabase.auth.getSession().then(({ data: { session }, error: sessionError }) => {
-      if (sessionError || !session) {
-        setError('Lien invalide ou expiré. Demandez un nouveau lien de réinitialisation.')
-      } else {
-        setReady(true)
-      }
-    })
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+
+    if (code) {
+      // PKCE : Supabase a redirigé ici avec ?code=xxxx — on échange le code
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) {
+          setError('Lien invalide ou expiré. Demandez un nouveau lien de réinitialisation.')
+        } else {
+          // Nettoyer le code de l'URL
+          window.history.replaceState({}, '', '/auth/reset-password')
+          setReady(true)
+        }
+      })
+    } else {
+      // Pas de code — vérifier si une session existe déjà
+      supabase.auth.getSession().then(({ data: { session }, error: sessionError }) => {
+        if (sessionError || !session) {
+          setError('Lien invalide ou expiré. Demandez un nouveau lien de réinitialisation.')
+        } else {
+          setReady(true)
+        }
+      })
+    }
   }, [])
 
   async function handleReset(e: React.FormEvent) {
