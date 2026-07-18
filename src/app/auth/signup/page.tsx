@@ -23,6 +23,7 @@ export default function SignUpPage() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [emailSent, setEmailSent] = useState(false)
 
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
@@ -61,10 +62,72 @@ export default function SignUpPage() {
       })
       if (profileError) console.error('Erreur création profil:', profileError)
     }
-    router.push(next)
+    // If email confirmation is enabled, session will be null — show "check your email" screen
+    // If auto-confirmed (confirmation disabled), redirect to dashboard
+    if (data.session) {
+      router.push(next)
+    } else {
+      setEmailSent(true)
+    }
+    setLoading(false)
   }
 
   const pwValid = password.length >= 8 && password === confirm
+
+  if (emailSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6"
+        style={{ background: 'linear-gradient(135deg,#f8f9ff 0%,#fefce8 100%)' }}>
+        <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-8 text-center">
+
+          {/* Icône enveloppe animée */}
+          <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-5">
+            <svg viewBox="0 0 40 40" fill="none" className="w-9 h-9" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="10" width="32" height="22" rx="3" fill="#e0e7ff"/>
+              <path d="M4 13l16 10 16-10" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="30" cy="11" r="6" fill="#22c55e"/>
+              <path d="M27 11l2 2 4-4" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+
+          <h1 className="text-xl font-extrabold text-gray-900 mb-2">Vérifiez vos courriels !</h1>
+          <p className="text-gray-500 text-sm mb-1">
+            Un courriel de confirmation a été envoyé à
+          </p>
+          <p className="font-semibold text-gray-800 text-sm mb-4 break-all">{email}</p>
+          <p className="text-gray-500 text-sm mb-6">
+            Cliquez sur le lien dans ce courriel pour activer votre compte, puis revenez vous connecter.
+          </p>
+
+          {/* Étapes visuelles */}
+          <div className="bg-indigo-50 rounded-xl p-4 text-left mb-6 space-y-2">
+            {[
+              { num: '1', text: 'Ouvrez votre boîte courriel' },
+              { num: '2', text: 'Cliquez sur le lien de confirmation Savoila' },
+              { num: '3', text: 'Revenez vous connecter ici' },
+            ].map(step => (
+              <div key={step.num} className="flex items-center gap-3">
+                <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                  {step.num}
+                </span>
+                <span className="text-gray-700 text-sm">{step.text}</span>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-xs text-gray-400 mb-5">
+            Vous ne voyez pas le courriel ? Vérifiez votre dossier <strong>courrier indésirable</strong> (spam).
+          </p>
+
+          <Link
+            href="/auth/login"
+            className="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition text-sm text-center">
+            Aller à la page de connexion →
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex">
