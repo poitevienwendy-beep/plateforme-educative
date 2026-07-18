@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
+import { sql } from '@/lib/db'
 
 const SUBJECT_EMOJIS: Record<string, string> = {
   mathematiques: '🔢',
@@ -18,22 +19,16 @@ export default async function ChoisirMatierePage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  // Vérifier accès parent → enfant
-  const { data: link } = await supabase
-    .from('parent_child_links')
-    .select('child_id')
-    .eq('parent_id', user.id)
-    .eq('child_id', childId)
-    .single()
-
+  // Vérifier accès parent → enfant (postgres direct — cache PostgREST cassé)
+  const [link] = await sql`
+    SELECT child_id FROM parent_child_links
+    WHERE parent_id = ${user.id}::uuid AND child_id = ${childId}::uuid
+  `
   if (!link) notFound()
 
-  const { data: child } = await supabase
-    .from('children')
-    .select('*')
-    .eq('id', childId)
-    .single()
-
+  const [child] = await sql`
+    SELECT * FROM children WHERE id = ${childId}::uuid
+  `
   if (!child) notFound()
 
   // Matières et compétences du niveau de l'enfant

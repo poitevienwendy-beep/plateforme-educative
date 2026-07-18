@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
+import { sql } from '@/lib/db'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -135,15 +136,16 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
-    const { data: link } = await supabase
-      .from('parent_child_links')
-      .select('child_id, children!inner(display_name)')
-      .eq('parent_id', user.id)
-      .eq('child_id', studentId)
-      .single()
-    if (!link) return NextResponse.json({ error: 'Élève introuvable' }, { status: 404 })
+    // postgres direct — parent_child_links et children absents du cache PostgREST
+    const [linkRow] = await sql<{ display_name: string }[]>`
+      SELECT c.display_name
+      FROM parent_child_links pcl
+      JOIN children c ON c.id = pcl.child_id
+      WHERE pcl.parent_id = ${user.id}::uuid AND pcl.child_id = ${studentId}::uuid
+    `
+    if (!linkRow) return NextResponse.json({ error: 'Élève introuvable' }, { status: 404 })
 
-    const childName = (link as any).children?.display_name ?? 'Votre enfant'
+    const childName = linkRow.display_name ?? 'Votre enfant'
 
     // Récupérer les données du rapport via admin client
     const admin = createAdminClient()

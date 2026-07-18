@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
+import { sql } from '@/lib/db'
 
 const GRADE_LABELS: Record<string, string> = {
   sec1: 'Secondaire 1',
@@ -35,21 +36,16 @@ export default async function EnfantProfilePage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const { data: link } = await supabase
-    .from('parent_child_links')
-    .select('child_id')
-    .eq('parent_id', user.id)
-    .eq('child_id', id)
-    .single()
-
+  // postgres direct — parent_child_links et children absents du cache PostgREST
+  const [link] = await sql`
+    SELECT child_id FROM parent_child_links
+    WHERE parent_id = ${user.id}::uuid AND child_id = ${id}::uuid
+  `
   if (!link) notFound()
 
-  const { data: child } = await supabase
-    .from('children')
-    .select('*')
-    .eq('id', id)
-    .single()
-
+  const [child] = await sql`
+    SELECT * FROM children WHERE id = ${id}::uuid
+  `
   if (!child) notFound()
 
   const { data: subjects } = await supabase

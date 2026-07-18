@@ -5,6 +5,7 @@ import Link from 'next/link'
 import ConsentModal from '@/components/ConsentModal'
 import OfflineBanner from '@/components/OfflineBanner'
 import { BktLockedCard, PremiumLockedCard } from './LockedSkillCard'
+import { sql } from '@/lib/db'
 
 const SUBJECT_EMOJIS: Record<string, string> = {
   mathematiques: '🔢',
@@ -69,13 +70,16 @@ export default async function EleveDashboardPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const { data: link } = await supabase
-    .from('parent_child_links').select('child_id')
-    .eq('parent_id', user.id).eq('child_id', childId).single()
+  // parent_child_links et children absents du cache PostgREST — postgres direct
+  const [link] = await sql`
+    SELECT child_id FROM parent_child_links
+    WHERE parent_id = ${user.id}::uuid AND child_id = ${childId}::uuid
+  `
   if (!link) notFound()
 
-  const { data: child } = await supabase
-    .from('children').select('*').eq('id', childId).single()
+  const [child] = await sql`
+    SELECT * FROM children WHERE id = ${childId}::uuid
+  `
   if (!child) notFound()
 
   const { count: masteryCount } = await supabase
