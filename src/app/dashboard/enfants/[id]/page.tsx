@@ -148,6 +148,12 @@ export default async function EnfantProfilePage({
             >
               📊 Rapport complet
             </Link>
+            <Link
+              href={`/dashboard/enfants/${child.id}/modifier`}
+              className="inline-flex items-center justify-center gap-2 border border-gray-200 text-gray-400 font-medium px-5 py-2 rounded-xl hover:bg-gray-50 transition-colors text-sm"
+            >
+              ✏️ Modifier le profil
+            </Link>
           </div>
         </div>
 
