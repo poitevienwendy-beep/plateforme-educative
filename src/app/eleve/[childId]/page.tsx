@@ -372,7 +372,7 @@ export default async function EleveDashboardPage({
               const barColor = getBarColor(subject.avgMastery)
 
               return (
-                <div key={subject.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div key={subject.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm">
 
                   {/* En-tête matière */}
                   <div className="px-5 pt-4 pb-3 flex items-center gap-3 border-b border-gray-50">
@@ -480,7 +480,7 @@ export default async function EleveDashboardPage({
                               <span className="text-base leading-none select-none">{icons[state]}</span>
                               {/* Anneau jaune qui s'expand — effet "suivant !" */}
                               {isRecommended && !isLocked && (
-                                <div className="absolute inset-0 rounded-full animate-ping bg-yellow-300 opacity-30" />
+                                <div className="absolute inset-0 rounded-full animate-ping bg-yellow-300 opacity-50" />
                               )}
                               {/* Badge ✓ pour les compétences maîtrisées */}
                               {isMasteredOrAdv && (
