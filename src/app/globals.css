@@ -66,3 +66,9 @@ body {
   0%, 100% { box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.70), 0 4px 14px rgba(245, 158, 11, 0.30); }
   50%      { box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.25), 0 4px 24px rgba(245, 158, 11, 0.55); }
 }
+
+/* Expansion jaune lente (4s, 2.5×) pour le nœud recommandé */
+@keyframes ping-slow {
+  0%        { transform: scale(1);   opacity: 0.55; }
+  75%, 100% { transform: scale(2.5); opacity: 0; }
+}

@@ -480,7 +480,8 @@ export default async function EleveDashboardPage({
                               <span className="text-base leading-none select-none">{icons[state]}</span>
                               {/* Anneau jaune qui s'expand — effet "suivant !" */}
                               {isRecommended && !isLocked && (
-                                <div className="absolute inset-0 rounded-full animate-ping bg-yellow-300 opacity-50" />
+                                <div className="absolute inset-0 rounded-full bg-yellow-300"
+                                  style={{ animation: 'ping-slow 4s cubic-bezier(0, 0, 0.2, 1) infinite' }} />
                               )}
                               {/* Badge ✓ pour les compétences maîtrisées */}
                               {isMasteredOrAdv && (
