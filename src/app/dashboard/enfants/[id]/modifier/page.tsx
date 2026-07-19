@@ -4,6 +4,14 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 
+// ─── Types accès enfant ───────────────────────────────────────────────────
+type ChildAccess = {
+  child_user_id: string | null
+  autonomy_mode: boolean
+  child_email: string | null
+  child_pin_hash: string | null
+}
+
 const GRADE_OPTIONS = [
   { value: 'sec1', label: 'Secondaire 1 (~12-13 ans)' },
   { value: 'sec2', label: 'Secondaire 2 (~13-14 ans)' },
@@ -28,6 +36,22 @@ export default function ModifierEnfantPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
+  // ── Accès enfant ───────────────────────────────────────────────────
+  const [access, setAccess] = useState<ChildAccess | null>(null)
+  // Mode PIN
+  const [pinMode, setPinMode] = useState<'idle' | 'setup' | 'success'>('idle')
+  const [newPin, setNewPin] = useState('')
+  const [confirmPin, setConfirmPin] = useState('')
+  const [pinLoading, setPinLoading] = useState(false)
+  const [pinError, setPinError] = useState<string | null>(null)
+  const [accessUrl, setAccessUrl] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+  // Mode autonomie
+  const [autoMode, setAutoMode] = useState<'idle' | 'setup' | 'sent'>('idle')
+  const [childEmail, setChildEmail] = useState('')
+  const [autoLoading, setAutoLoading] = useState(false)
+  const [autoError, setAutoError] = useState<string | null>(null)
+
   // Charger les données actuelles de l'enfant
   useEffect(() => {
     async function loadChild() {
@@ -41,6 +65,19 @@ export default function ModifierEnfantPage() {
         setDisplayName(data.display_name ?? '')
         setBirthYear(data.birth_year ? String(data.birth_year) : '')
         setGradeLevel(data.grade_level ?? 'sec1')
+        setAccess({
+          child_user_id:  data.child_user_id  ?? null,
+          autonomy_mode:  data.autonomy_mode  ?? false,
+          child_email:    data.child_email    ?? null,
+          child_pin_hash: data.child_pin_hash ?? null,
+        })
+        if (data.child_user_id && !data.autonomy_mode) {
+          setAccessUrl(`${window.location.origin}/acces-enfant/${childId}`)
+        }
+        if (data.autonomy_mode && data.child_email) {
+          setAutoMode('sent')
+          setChildEmail(data.child_email)
+        }
       } catch {
         router.push('/dashboard')
       } finally {
@@ -49,6 +86,51 @@ export default function ModifierEnfantPage() {
     }
     loadChild()
   }, [childId, router])
+
+  // ── Handlers accès enfant ────────────────────────────────────────
+  async function handleSetupPin(e: React.FormEvent) {
+    e.preventDefault()
+    setPinError(null)
+    if (!/^\d{4}$/.test(newPin)) { setPinError('Le PIN doit être 4 chiffres.'); return }
+    if (newPin !== confirmPin)    { setPinError('Les deux codes ne correspondent pas.'); return }
+    setPinLoading(true)
+    const res = await fetch('/api/children/setup-pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ child_id: childId, pin: newPin }),
+    })
+    const data = await res.json()
+    setPinLoading(false)
+    if (!res.ok) { setPinError(data.error ?? 'Erreur'); return }
+    const url = `${window.location.origin}${data.access_url}`
+    setAccessUrl(url)
+    setPinMode('success')
+    setNewPin('')
+    setConfirmPin('')
+  }
+
+  function handleCopyLink() {
+    if (!accessUrl) return
+    navigator.clipboard.writeText(accessUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function handleSendInvite(e: React.FormEvent) {
+    e.preventDefault()
+    setAutoError(null)
+    if (!childEmail.includes('@')) { setAutoError('Courriel invalide.'); return }
+    setAutoLoading(true)
+    const res = await fetch('/api/children/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ child_id: childId, child_email: childEmail }),
+    })
+    const data = await res.json()
+    setAutoLoading(false)
+    if (!res.ok) { setAutoError(data.error ?? 'Erreur'); return }
+    setAutoMode('sent')
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -194,6 +276,176 @@ export default function ModifierEnfantPage() {
             {loading ? 'Enregistrement…' : 'Enregistrer les modifications'}
           </button>
         </form>
+
+        {/* ── Section : Accès enfant ────────────────────────────── */}
+        <div className="mt-8 bg-white rounded-xl border border-indigo-100 p-6 space-y-5">
+          <div>
+            <h2 className="text-sm font-semibold text-indigo-700 mb-0.5">🔐 Accès autonome pour l&apos;enfant</h2>
+            <p className="text-xs text-gray-500">
+              Choisis un mode selon l&apos;âge de l&apos;enfant.
+              Les deux modes permettent au parent de continuer à voir la progression.
+            </p>
+          </div>
+
+          {/* ── Option A : PIN (primaire) ── */}
+          <div className="border border-gray-100 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <p className="text-sm font-semibold text-gray-800">📱 Code secret PIN <span className="text-xs font-normal text-gray-400">(primaire · 6-12 ans)</span></p>
+                <p className="text-xs text-gray-500 mt-0.5">L&apos;enfant entre un code 4 chiffres sur son appareil.</p>
+              </div>
+              {access?.child_user_id && !access?.autonomy_mode && (
+                <span className="text-xs bg-green-100 text-green-700 font-semibold px-2 py-1 rounded-full">Actif</span>
+              )}
+            </div>
+
+            {/* Lien existant */}
+            {accessUrl && !access?.autonomy_mode && (
+              <div className="mb-3 bg-indigo-50 rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+                <span className="text-xs text-indigo-600 truncate font-mono">{accessUrl}</span>
+                <button
+                  onClick={handleCopyLink}
+                  className="text-xs font-semibold text-indigo-700 shrink-0 hover:underline"
+                >
+                  {copied ? 'Copié ✓' : 'Copier'}
+                </button>
+              </div>
+            )}
+
+            {pinMode === 'idle' && (
+              <button
+                onClick={() => setPinMode('setup')}
+                className="text-sm font-medium text-indigo-600 border border-indigo-200 px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors"
+              >
+                {access?.child_pin_hash ? 'Changer le code PIN' : 'Configurer un code PIN'}
+              </button>
+            )}
+
+            {pinMode === 'setup' && (
+              <form onSubmit={handleSetupPin} className="space-y-3 mt-3">
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-600 mb-1">Nouveau code (4 chiffres)</label>
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={newPin}
+                      onChange={e => setNewPin(e.target.value.replace(/\D/g,''))}
+                      placeholder="••••"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center tracking-widest"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-600 mb-1">Confirmer le code</label>
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={4}
+                      value={confirmPin}
+                      onChange={e => setConfirmPin(e.target.value.replace(/\D/g,''))}
+                      placeholder="••••"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center tracking-widest"
+                    />
+                  </div>
+                </div>
+                {pinError && <p className="text-xs text-red-600">{pinError}</p>}
+                <div className="flex gap-2">
+                  <button type="submit" disabled={pinLoading}
+                    className="bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+                    {pinLoading ? 'Création…' : 'Créer le code'}
+                  </button>
+                  <button type="button" onClick={() => { setPinMode('idle'); setNewPin(''); setConfirmPin(''); setPinError(null) }}
+                    className="text-sm text-gray-500 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                    Annuler
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {pinMode === 'success' && accessUrl && (
+              <div className="mt-3 bg-green-50 border border-green-200 rounded-xl p-4">
+                <p className="text-sm font-semibold text-green-700 mb-2">✅ Code PIN créé !</p>
+                <p className="text-xs text-gray-600 mb-2">Envoie ce lien à ton enfant. Il peut le mettre en favori.</p>
+                <div className="flex items-center gap-2 bg-white border border-green-200 rounded-lg px-3 py-2">
+                  <span className="text-xs font-mono text-indigo-600 flex-1 truncate">{accessUrl}</span>
+                  <button onClick={handleCopyLink}
+                    className="text-xs font-semibold text-indigo-700 shrink-0 hover:underline">
+                    {copied ? 'Copié ✓' : 'Copier'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Option B : Mode autonomie (secondaire) ── */}
+          <div className="border border-gray-100 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <p className="text-sm font-semibold text-gray-800">📧 Compte indépendant <span className="text-xs font-normal text-gray-400">(secondaire · 12+ ans)</span></p>
+                <p className="text-xs text-gray-500 mt-0.5">L&apos;enfant reçoit un courriel et crée son propre accès.</p>
+              </div>
+              {access?.autonomy_mode && (
+                <span className="text-xs bg-blue-100 text-blue-700 font-semibold px-2 py-1 rounded-full">
+                  {access.child_user_id ? 'Activé' : 'En attente'}
+                </span>
+              )}
+            </div>
+
+            {autoMode === 'idle' && (
+              <button
+                onClick={() => setAutoMode('setup')}
+                className="text-sm font-medium text-indigo-600 border border-indigo-200 px-4 py-2 rounded-lg hover:bg-indigo-50 transition-colors"
+              >
+                {access?.autonomy_mode ? 'Renvoyer l&apos;invitation' : 'Envoyer une invitation'}
+              </button>
+            )}
+
+            {autoMode === 'setup' && (
+              <form onSubmit={handleSendInvite} className="space-y-3 mt-3">
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Courriel de l&apos;enfant</label>
+                  <input
+                    type="email"
+                    value={childEmail}
+                    onChange={e => setChildEmail(e.target.value)}
+                    placeholder="prenom@exemple.com"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                {autoError && <p className="text-xs text-red-600">{autoError}</p>}
+                <div className="flex gap-2">
+                  <button type="submit" disabled={autoLoading}
+                    className="bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
+                    {autoLoading ? 'Envoi…' : 'Envoyer l&apos;invitation'}
+                  </button>
+                  <button type="button" onClick={() => { setAutoMode('idle'); setAutoError(null) }}
+                    className="text-sm text-gray-500 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                    Annuler
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {autoMode === 'sent' && (
+              <div className="mt-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <p className="text-sm font-semibold text-blue-700 mb-1">
+                  {access?.child_user_id ? '✅ Compte activé' : '📬 Invitation envoyée !'}
+                </p>
+                <p className="text-xs text-gray-600">
+                  {access?.child_user_id
+                    ? `${childEmail} peut se connecter directement.`
+                    : `${childEmail} recevra un courriel avec les instructions. L'enfant doit cliquer sur le lien pour activer son accès.`
+                  }
+                </p>
+                <button onClick={() => setAutoMode('setup')}
+                  className="mt-2 text-xs text-blue-600 hover:underline">
+                  Renvoyer / changer de courriel
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Zone danger — suppression */}
         <div className="mt-8 bg-white rounded-xl border border-red-100 p-6">

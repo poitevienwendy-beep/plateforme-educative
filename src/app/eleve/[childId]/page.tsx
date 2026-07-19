@@ -68,28 +68,41 @@ export default async function EleveDashboardPage({
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(`/acces-enfant/${childId}`)
 
-  // parent_child_links et children absents du cache PostgREST — postgres direct
-  const [link] = await sql`
-    SELECT child_id FROM parent_child_links
-    WHERE parent_id = ${user.id}::uuid AND child_id = ${childId}::uuid
-  `
-  if (!link) notFound()
-
+  // Vérifier l'accès : soit parent (parent_child_links), soit enfant (child_user_id)
   const [child] = await sql`
     SELECT * FROM children WHERE id = ${childId}::uuid
   `
   if (!child) notFound()
+
+  const isChildUser = child.child_user_id === user.id
+
+  if (!isChildUser) {
+    // Vérifier ownership parent
+    const [link] = await sql`
+      SELECT child_id FROM parent_child_links
+      WHERE parent_id = ${user.id}::uuid AND child_id = ${childId}::uuid
+    `
+    if (!link) notFound()
+  }
 
   const { count: masteryCount } = await supabase
     .from('knowledge_states').select('*', { count: 'exact', head: true }).eq('child_id', childId)
   if ((masteryCount ?? 0) === 0) redirect(`/eleve/${childId}/diagnostic`)
 
   // Utiliser l'admin client pour bypasser RLS et lire le plan correctement
+  // Si l'enfant est connecté, on cherche le plan du parent via parent_child_links
   const admin = createAdminClient()
+  let planUserId = user.id
+  if (isChildUser) {
+    const [parentLink] = await sql`
+      SELECT parent_id FROM parent_child_links WHERE child_id = ${childId}::uuid LIMIT 1
+    `
+    if (parentLink) planUserId = parentLink.parent_id
+  }
   const { data: profile } = await admin
-    .from('profiles').select('plan').eq('id', user.id).single()
+    .from('profiles').select('plan').eq('id', planUserId).single()
   const plan: 'free' | 'premium' = (profile?.plan as 'free' | 'premium') ?? 'free'
 
   // XP

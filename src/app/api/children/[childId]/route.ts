@@ -24,7 +24,11 @@ export async function GET(
     }
 
     const [child] = await sql`
-      SELECT id, display_name, birth_year, grade_level FROM children
+      SELECT
+        id, display_name, birth_year, grade_level,
+        child_user_id, autonomy_mode, child_email,
+        (child_pin_hash IS NOT NULL) AS child_pin_hash
+      FROM children
       WHERE id = ${childId}::uuid
     `
     if (!child) {
