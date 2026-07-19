@@ -469,7 +469,7 @@ export default async function EleveDashboardPage({
                                 isRecommended && !isLocked
                                   ? {
                                       animation: 'skill-bounce 2.5s ease-in-out infinite',
-                                      outline: '4px solid #facc15',
+                                      outline: '4px solid #ffe600',
                                       outlineOffset: '4px',
                                     }
                                   : isMasteredOrAdv
@@ -478,6 +478,10 @@ export default async function EleveDashboardPage({
                               }
                             >
                               <span className="text-base leading-none select-none">{icons[state]}</span>
+                              {/* Anneau jaune qui s'expand — effet "suivant !" */}
+                              {isRecommended && !isLocked && (
+                                <div className="absolute inset-0 rounded-full animate-ping bg-yellow-300 opacity-30" />
+                              )}
                               {/* Badge ✓ pour les compétences maîtrisées */}
                               {isMasteredOrAdv && (
                                 <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-green-500 border-2 border-white flex items-center justify-center">
