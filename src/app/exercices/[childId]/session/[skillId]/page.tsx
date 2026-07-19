@@ -62,6 +62,21 @@ function storageKey(childId: string, skillId: string) {
   return `educp_sess_${childId}_${skillId}`
 }
 
+function lsKey(childId: string, skillId: string) {
+  return `educp_resume_${childId}_${skillId}`
+}
+
+type SavedSession = {
+  questions: Question[]
+  skillName: string
+  sessionId: string
+  current: number
+  liveXp: number
+  combo: number
+  correctCount: number
+  savedAt: number
+}
+
 const CONGRATS = ['Excellent ! 🎯', 'Parfait ! ✨', 'Bien joue ! 👏', 'Super ! 🌟', 'Bravo ! 🎉']
 const WRONG_TIMER_SECONDS = 30  // secondes de réflexion forcée après une mauvaise réponse (optimal selon recherche mémoire de travail)
 
@@ -135,6 +150,7 @@ export default function SessionPage({
   const [combo, setCombo] = useState(0)
   const [liveXp, setLiveXp] = useState(0)
   const [xpBarGlow, setXpBarGlow] = useState(false)
+  const [resumeData, setResumeData] = useState<SavedSession | null>(null)
   // Anti-frustration : compteur d'échecs qualifiés + état indice
   const qualifiedFailures = useRef(0)
   const [showHint, setShowHint] = useState(false)
@@ -156,6 +172,81 @@ export default function SessionPage({
     return () => clearTimeout(id)
   }, [wrongTimer])
 
+  // Protection contre la fermeture accidentelle en cours de session
+  useEffect(() => {
+    if (loading || results !== null || resumeData !== null) return
+    if (current === 0 && selected === null) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [loading, results, resumeData, current, selected])
+
+  function handleResume() {
+    if (!resumeData) return
+    setQuestions(resumeData.questions)
+    setSkillName(resumeData.skillName)
+    setSessionId(resumeData.sessionId)
+    setCurrent(resumeData.current)
+    setLiveXp(resumeData.liveXp ?? 0)
+    setCombo(resumeData.combo ?? 0)
+    correctCount.current = resumeData.correctCount ?? 0
+    sessionStorage.setItem(storageKey(childId, skillId), JSON.stringify({
+      questions: resumeData.questions, skillName: resumeData.skillName,
+      sessionId: resumeData.sessionId, current: resumeData.current,
+      liveXp: resumeData.liveXp ?? 0, combo: resumeData.combo ?? 0,
+      correctCount: resumeData.correctCount ?? 0,
+    }))
+    setResumeData(null)
+    startTimeRef.current = Date.now()
+  }
+
+  async function handleRestart() {
+    localStorage.removeItem(lsKey(childId, skillId))
+    sessionStorage.removeItem(storageKey(childId, skillId))
+    setResumeData(null)
+    setLoading(true)
+    setCurrent(0)
+    setSelected(null)
+    setLiveXp(0)
+    setCombo(0)
+    correctCount.current = 0
+    setError(null)
+    const supabase = createClient()
+    const { data: skill } = await supabase.from('skills').select('name').eq('id', skillId).single()
+    const name = skill?.name ?? ''
+    if (name) setSkillName(name)
+    const { data: qs, error: qErr } = await supabase.rpc('get_questions_for_skill', {
+      p_skill_id: skillId, p_limit: 25, p_child_id: childId,
+    })
+    if (qErr || !qs || qs.length === 0) {
+      setError(qErr?.message ?? 'Aucune question disponible.')
+      setLoading(false)
+      return
+    }
+    setQuestions(qs)
+    const { data: session, error: sessErr } = await supabase.rpc('start_exercise_session', {
+      p_child_id: childId, p_skill_id: skillId,
+    })
+    if (sessErr || !session) {
+      setError('Erreur demarrage : ' + (sessErr?.message ?? ''))
+      setLoading(false)
+      return
+    }
+    setSessionId(session)
+    const initialState = {
+      questions: qs, skillName: name, sessionId: session,
+      current: 0, liveXp: 0, combo: 0, correctCount: 0,
+      savedAt: Date.now(),
+    }
+    sessionStorage.setItem(storageKey(childId, skillId), JSON.stringify(initialState))
+    localStorage.setItem(lsKey(childId, skillId), JSON.stringify(initialState))
+    setLoading(false)
+    startTimeRef.current = Date.now()
+  }
+
   useEffect(() => {
     if (initDone.current) return
     initDone.current = true
@@ -176,6 +267,21 @@ export default function SessionPage({
           startTimeRef.current = Date.now()
           return
         } catch { /* ignore */ }
+      }
+
+      // 2. Vérifier localStorage pour reprendre une session interrompue
+      const lsSaved = localStorage.getItem(lsKey(childId, skillId))
+      if (lsSaved) {
+        try {
+          const s = JSON.parse(lsSaved) as SavedSession
+          const age = Date.now() - (s.savedAt ?? 0)
+          if (age < 24 * 60 * 60 * 1000 && s.current > 0) {
+            setResumeData(s)
+            setLoading(false)
+            return
+          }
+        } catch { /* ignore */ }
+        localStorage.removeItem(lsKey(childId, skillId))
       }
 
       const supabase = createClient()
@@ -203,11 +309,14 @@ export default function SessionPage({
       }
       setSessionId(session)
 
-      // Sauvegarder l etat initial
-      sessionStorage.setItem(storageKey(childId, skillId), JSON.stringify({
+      // Sauvegarder l etat initial (sessionStorage = même onglet, localStorage = cross-session)
+      const initialState = {
         questions: qs, skillName: name, sessionId: session,
         current: 0, liveXp: 0, combo: 0, correctCount: 0,
-      }))
+        savedAt: Date.now(),
+      }
+      sessionStorage.setItem(storageKey(childId, skillId), JSON.stringify(initialState))
+      localStorage.setItem(lsKey(childId, skillId), JSON.stringify(initialState))
 
       setLoading(false)
       startTimeRef.current = Date.now()
@@ -265,9 +374,12 @@ export default function SessionPage({
     const existing   = sessionStorage.getItem(storageKey(childId, skillId))
     if (existing) {
       const base = JSON.parse(existing)
-      sessionStorage.setItem(storageKey(childId, skillId), JSON.stringify({
+      const updated = JSON.stringify({
         ...base, correctCount: newCorrect, liveXp: newLiveXp, combo: newCombo,
-      }))
+        savedAt: Date.now(),
+      })
+      sessionStorage.setItem(storageKey(childId, skillId), updated)
+      localStorage.setItem(lsKey(childId, skillId), updated)
     }
 
     const supabase = createClient()
@@ -304,8 +416,9 @@ export default function SessionPage({
         const { data: bd } = await supabase.from('badges').select('slug,name,icon,description').in('slug', newBadgeSlugs)
         newBadges = bd ?? []
       }
-      // Session terminee : effacer le storage pour eviter la restauration
+      // Session terminee : effacer les deux storages pour eviter la restauration
       sessionStorage.removeItem(storageKey(childId, skillId))
+      localStorage.removeItem(lsKey(childId, skillId))
       setResults({
         sessionId: sessionId!, correct: correctCount.current, total: questions.length,
         skillName, xpEarned, totalXp: newTotalXp ?? 0,
@@ -317,7 +430,9 @@ export default function SessionPage({
       const existing = sessionStorage.getItem(storageKey(childId, skillId))
       if (existing) {
         const base = JSON.parse(existing)
-        sessionStorage.setItem(storageKey(childId, skillId), JSON.stringify({ ...base, current: nextIdx }))
+        const updated = JSON.stringify({ ...base, current: nextIdx, savedAt: Date.now() })
+        sessionStorage.setItem(storageKey(childId, skillId), updated)
+        localStorage.setItem(lsKey(childId, skillId), updated)
       }
       setCurrent(nextIdx)
       setSelected(null)
@@ -327,6 +442,31 @@ export default function SessionPage({
       startTimeRef.current = Date.now()
     }
   }
+
+  if (resumeData !== null) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-8 max-w-sm w-full text-center">
+        <div className="text-5xl mb-4">📖</div>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Tu avais une session en cours !</h2>
+        <p className="text-gray-600 text-sm font-medium mb-1">{resumeData.skillName}</p>
+        <p className="text-gray-400 text-xs mb-6">
+          Question {resumeData.current + 1} sur {resumeData.questions.length} — {resumeData.liveXp} XP gagnés
+        </p>
+        <button
+          onClick={handleResume}
+          className="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 transition-colors mb-3"
+        >
+          ▶ Continuer où j'en étais
+        </button>
+        <button
+          onClick={handleRestart}
+          className="w-full border border-gray-200 text-gray-500 font-medium py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm"
+        >
+          Recommencer depuis le début
+        </button>
+      </div>
+    </div>
+  )
 
   if (loading) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
