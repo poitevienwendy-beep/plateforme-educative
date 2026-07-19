@@ -374,6 +374,12 @@ export default function ModifierEnfantPage() {
                     {copied ? 'Copié ✓' : 'Copier'}
                   </button>
                 </div>
+                <button
+                  onClick={() => { setPinMode('setup'); setNewPin(''); setConfirmPin(''); setPinError(null) }}
+                  className="mt-3 text-xs text-indigo-600 hover:underline"
+                >
+                  Changer le code PIN
+                </button>
               </div>
             )}
           </div>

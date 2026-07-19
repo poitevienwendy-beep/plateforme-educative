@@ -54,10 +54,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Erreur création session: ' + signInErr?.message }, { status: 500 })
     }
 
-    // Extraire le token depuis le magic link généré
-    const linkUrl = new URL(session.properties.action_link)
-    const tokenHash = linkUrl.searchParams.get('token_hash')
-    const emailOtpType = linkUrl.searchParams.get('type')
+    // Extraire le token depuis les propriétés du magic link
+    const tokenHash = session.properties.hashed_token
+    const emailOtpType = session.properties.verification_type ?? 'magiclink'
 
     return NextResponse.json({
       success: true,
