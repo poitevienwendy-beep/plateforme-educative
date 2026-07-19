@@ -459,7 +459,11 @@ export default async function EleveDashboardPage({
                               className={`relative w-16 h-16 rounded-full border-4 flex items-center justify-center shadow-md flex-shrink-0 transition-all ${bgStyle[state]}`}
                               style={
                                 isRecommended && !isLocked
-                                  ? { animation: 'skill-bounce 2.5s ease-in-out infinite, glow-gold 2s ease-in-out infinite' }
+                                  ? {
+                                      animation: 'skill-bounce 2.5s ease-in-out infinite',
+                                      outline: '4px solid #f59e0b',
+                                      outlineOffset: '4px',
+                                    }
                                   : isMasteredOrAdv
                                   ? { animation: 'glow-green 2.5s ease-in-out infinite' }
                                   : undefined
