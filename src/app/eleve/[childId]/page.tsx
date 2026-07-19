@@ -4,7 +4,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import ConsentModal from '@/components/ConsentModal'
 import OfflineBanner from '@/components/OfflineBanner'
-import { BktLockedCard, PremiumLockedCard } from './LockedSkillCard'
+// LockedSkillCard remplacé par les états inline du parcours visuel
 import { sql } from '@/lib/db'
 
 const SUBJECT_EMOJIS: Record<string, string> = {
@@ -352,10 +352,12 @@ export default async function EleveDashboardPage({
           </div>
         )}
 
-        {/* ── Progression par matière ──────────────────────── */}
+        {/* ── Mon parcours ─────────────────────────────────── */}
         <div>
-          <h2 className="text-base font-bold text-gray-700 mb-3 px-1">Ma progression 📊</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+          <h2 className="text-base font-bold text-gray-700 mb-1 px-1">Mon parcours 🗺️</h2>
+          <p className="text-xs text-gray-400 mb-4 px-1">Complète chaque étape pour débloquer la suivante</p>
+
+          <div className="space-y-5">
             {subjectsEnriched.map(subject => {
               const emoji = SUBJECT_EMOJIS[subject.slug] ?? '📚'
               const pct = subject.avgMastery !== null ? Math.round(subject.avgMastery * 100) : null
@@ -363,66 +365,140 @@ export default async function EleveDashboardPage({
 
               return (
                 <div key={subject.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                  <div className="px-5 py-4 flex items-center gap-3">
+
+                  {/* En-tête matière */}
+                  <div className="px-5 pt-4 pb-3 flex items-center gap-3 border-b border-gray-50">
                     <span className="text-2xl">{emoji}</span>
                     <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center justify-between mb-1">
                         <p className="font-bold text-gray-900">{subject.name}</p>
                         <span className="text-sm font-bold" style={{ color: barColor }}>
                           {pct !== null ? `${pct}%` : '—'}
                         </span>
                       </div>
-                      <div className="w-full bg-gray-100 rounded-full h-3">
-                        <div className="h-3 rounded-full transition-all duration-700"
+                      <div className="w-full bg-gray-100 rounded-full h-2">
+                        <div className="h-2 rounded-full transition-all duration-700"
                           style={{ width: pct !== null ? `${pct}%` : '0%', backgroundColor: barColor }} />
                       </div>
                     </div>
                   </div>
 
-                  <div className="px-4 pb-4 grid grid-cols-2 gap-2">
-                    {subject.skills.map((skill, idx) => {
-                      const stars = getStars(skill.mastery)
-                      const label = getStarLabel(skill.mastery)
-                      const barC = getBarColor(skill.mastery)
-                      const pctSkill = skill.mastery !== null ? Math.round(skill.mastery * 100) : null
-                      const isRecommended = skill.id === recommended?.id
-                      const previousSkillName = idx > 0 ? subject.skills[idx - 1].name : ''
+                  {/* Chemin des compétences */}
+                  <div className="px-4 py-5">
+                    <div className="max-w-xs mx-auto">
+                      {subject.skills.map((skill, idx) => {
+                        const isLeft = idx % 2 === 0
+                        const isLast = idx === subject.skills.length - 1
+                        const isRecommended = skill.id === recommended?.id
+                        const previousSkillName = idx > 0 ? subject.skills[idx - 1].name : ''
 
-                      if (skill.premiumLocked) return (
-                        <PremiumLockedCard key={skill.id} skillName={skill.name} />
-                      )
+                        type SkillState = 'mastered' | 'advanced' | 'inprogress' | 'new' | 'bkt' | 'premium'
+                        let state: SkillState
+                        if (skill.premiumLocked) state = 'premium'
+                        else if (skill.bktLocked) state = 'bkt'
+                        else if (skill.mastery !== null && skill.mastery >= 0.90) state = 'mastered'
+                        else if (skill.mastery !== null && skill.mastery >= 0.65) state = 'advanced'
+                        else if (skill.mastery !== null) state = 'inprogress'
+                        else state = 'new'
 
-                      if (skill.bktLocked) return (
-                        <BktLockedCard key={skill.id} skillName={skill.name} previousSkillName={previousSkillName} />
-                      )
+                        const isLocked = state === 'bkt' || state === 'premium'
+                        const isMasteredOrAdv = state === 'mastered' || state === 'advanced'
 
-                      return (
-                        <Link key={skill.id}
-                          href={`/exercices/${childId}/session/${skill.id}`}
-                          className={`flex flex-col p-3 rounded-xl transition-all ${
-                            isRecommended
-                              ? 'bg-indigo-50 border-2 border-indigo-300'
-                              : 'bg-gray-50 border-2 border-transparent hover:border-gray-200 hover:bg-gray-100'
-                          }`}>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-base leading-none">{stars || '🌱'}</span>
-                            {isRecommended
-                              ? <span className="text-xs bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full font-semibold">✨</span>
-                              : <span className="invisible text-xs px-1.5 py-0.5">·</span>
-                            }
+                        const bgStyle: Record<SkillState, string> = {
+                          mastered:   'bg-green-500 border-green-300 text-white',
+                          advanced:   'bg-emerald-400 border-emerald-300 text-white',
+                          inprogress: 'bg-indigo-500 border-indigo-300 text-white',
+                          new:        'bg-white border-indigo-300 text-indigo-400',
+                          bkt:        'bg-gray-100 border-gray-200 text-gray-300',
+                          premium:    'bg-amber-50 border-amber-200 text-amber-300',
+                        }
+                        const icons: Record<SkillState, string> = {
+                          mastered:   '⭐⭐⭐',
+                          advanced:   '⭐⭐',
+                          inprogress: '⭐',
+                          new:        '🌱',
+                          bkt:        '🔒',
+                          premium:    '👑',
+                        }
+                        const stateLabels: Record<SkillState, string> = {
+                          mastered:   'Expert !',
+                          advanced:   'Avancé',
+                          inprogress: `${Math.round((skill.mastery ?? 0) * 100)}%`,
+                          new:        'Nouveau',
+                          bkt:        previousSkillName ? `Termine "${previousSkillName}"` : 'Verrouillé',
+                          premium:    'Premium requis',
+                        }
+
+                        const textBlock = (
+                          <div className={`w-24 flex-shrink-0 ${isLeft ? 'text-right' : 'text-left'}`}>
+                            <p className={`text-xs font-bold leading-snug line-clamp-2 ${isLocked ? 'text-gray-300' : 'text-gray-800'}`}>
+                              {skill.name}
+                            </p>
+                            <p className={`text-[10px] mt-0.5 leading-tight ${isLocked ? 'text-gray-300' : 'text-gray-400'}`}>
+                              {stateLabels[state]}
+                            </p>
+                            {skill.mastery !== null && !isLocked && (
+                              <div className={`mt-1 h-1 bg-gray-100 rounded-full w-14 ${isLeft ? 'ml-auto' : ''}`}>
+                                <div className="h-1 rounded-full" style={{
+                                  width: `${Math.round((skill.mastery ?? 0) * 100)}%`,
+                                  backgroundColor: isMasteredOrAdv ? '#10b981' : '#4f46e5',
+                                }} />
+                              </div>
+                            )}
                           </div>
-                          <p className="text-xs font-semibold text-gray-800 leading-tight line-clamp-2 flex-1 mb-2">{skill.name}</p>
-                          <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
-                            <div className="h-1.5 rounded-full"
-                              style={{ width: `${pctSkill ?? 0}%`, backgroundColor: barC }} />
+                        )
+
+                        const emptySlot = <div className="w-24 flex-shrink-0" />
+
+                        const skillRow = (
+                          <div className="flex items-center justify-center gap-3">
+                            {isLeft ? textBlock : emptySlot}
+
+                            {/* Nœud */}
+                            <div className={`relative w-14 h-14 rounded-full border-4 flex items-center justify-center shadow-md flex-shrink-0 transition-transform
+                              ${bgStyle[state]}
+                              ${isRecommended && !isLocked ? 'ring-4 ring-indigo-200 ring-offset-2 scale-110' : ''}
+                            `}>
+                              <span className="text-sm leading-none select-none">{icons[state]}</span>
+                              {/* Pulse pour la compétence recommandée */}
+                              {isRecommended && !isLocked && (
+                                <div className="absolute inset-0 rounded-full animate-ping bg-indigo-300 opacity-25" />
+                              )}
+                              {/* Badge ✓ pour les compétences maîtrisées */}
+                              {isMasteredOrAdv && (
+                                <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-green-500 border-2 border-white flex items-center justify-center">
+                                  <span className="text-white font-black" style={{ fontSize: 9 }}>✓</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {!isLeft ? textBlock : emptySlot}
                           </div>
-                          {pctSkill !== null
-                            ? <span className="text-xs font-bold" style={{ color: barC }}>{pctSkill}% · {label}</span>
-                            : <span className="text-xs text-gray-400">Nouveau</span>
-                          }
-                        </Link>
-                      )
-                    })}
+                        )
+
+                        return (
+                          <div key={skill.id}>
+                            {/* Nœud — cliquable ou verrouillé */}
+                            {isLocked ? (
+                              <div className="cursor-not-allowed">{skillRow}</div>
+                            ) : (
+                              <Link
+                                href={`/exercices/${childId}/session/${skill.id}`}
+                                className="block active:scale-95 transition-transform duration-150">
+                                {skillRow}
+                              </Link>
+                            )}
+                            {/* Ligne de connexion vers le prochain nœud */}
+                            {!isLast && (
+                              <div className="flex justify-center py-0.5">
+                                <div className="w-0.5 h-5 rounded-full transition-colors"
+                                  style={{ backgroundColor: isMasteredOrAdv ? '#6ee7b7' : '#e5e7eb' }} />
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
                 </div>
               )
