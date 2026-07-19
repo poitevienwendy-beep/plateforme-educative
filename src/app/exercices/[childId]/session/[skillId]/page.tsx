@@ -63,6 +63,7 @@ function storageKey(childId: string, skillId: string) {
 }
 
 const CONGRATS = ['Excellent ! 🎯', 'Parfait ! ✨', 'Bien joue ! 👏', 'Super ! 🌟', 'Bravo ! 🎉']
+const WRONG_TIMER_SECONDS = 20  // secondes de réflexion forcée après une mauvaise réponse
 
 export default function SessionPage({
   params,
@@ -89,11 +90,20 @@ export default function SessionPage({
   // Anti-frustration : compteur d'échecs qualifiés + état indice
   const qualifiedFailures = useRef(0)
   const [showHint, setShowHint] = useState(false)
+  // Timer pédagogique : force la lecture de l'explication après une mauvaise réponse
+  const [wrongTimer, setWrongTimer] = useState(0)
   // Remontée graduelle : géré côté SQL dans get_questions_for_skill (difficulty_level progressif)
 
   const startTimeRef = useRef<number>(Date.now())
   const correctCount = useRef(0)
   const initDone = useRef(false)
+
+  // Décompte du timer pédagogique (1 tick/seconde)
+  useEffect(() => {
+    if (wrongTimer <= 0) return
+    const id = setTimeout(() => setWrongTimer(t => t - 1), 1000)
+    return () => clearTimeout(id)
+  }, [wrongTimer])
 
   useEffect(() => {
     if (initDone.current) return
@@ -174,6 +184,7 @@ export default function SessionPage({
       setShowHint(false)
     } else {
       setCombo(0)
+      setWrongTimer(WRONG_TIMER_SECONDS) // déclenche le timer de lecture forcée
       // Échec qualifié = réponse après réflexion (≥ 4s) ou 2e erreur rapide
       const isQualified = responseMs >= 4000 || qualifiedFailures.current >= 1
       if (isQualified) {
@@ -252,6 +263,7 @@ export default function SessionPage({
       setSelected(null)
       setCongrats('')
       setShowHint(false)
+      setWrongTimer(0)
       startTimeRef.current = Date.now()
     }
   }
@@ -462,11 +474,30 @@ export default function SessionPage({
         )}
 
         {revealed && (
-          <button onClick={handleNext}
-            className="w-full text-white font-semibold py-4 rounded-2xl"
-            style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}>
-            {current === questions.length - 1 ? 'Voir mes resultats' : 'Question suivante'}
-          </button>
+          <div>
+            {/* Timer pédagogique — uniquement après une mauvaise réponse */}
+            {wrongTimer > 0 && (
+              <div className="mb-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-amber-700">📖 Prends le temps de bien lire...</span>
+                  <span className="text-base font-bold text-amber-600 tabular-nums">{wrongTimer}s</span>
+                </div>
+                <div className="w-full bg-amber-100 rounded-full h-2">
+                  <div className="h-2 rounded-full bg-amber-400 transition-all duration-1000 ease-linear"
+                    style={{ width: `${(wrongTimer / WRONG_TIMER_SECONDS) * 100}%` }} />
+                </div>
+              </div>
+            )}
+            <button onClick={handleNext} disabled={wrongTimer > 0}
+              className={`w-full font-semibold py-4 rounded-2xl transition-all duration-300 ${
+                wrongTimer > 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'text-white'
+              }`}
+              style={wrongTimer === 0 ? { background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' } : {}}>
+              {wrongTimer > 0
+                ? '⏳ Patiente encore...'
+                : current === questions.length - 1 ? 'Voir mes résultats 🎯' : 'Question suivante →'}
+            </button>
+          </div>
         )}
       </main>
      </div>
