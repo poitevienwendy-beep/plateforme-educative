@@ -63,7 +63,7 @@ function storageKey(childId: string, skillId: string) {
 }
 
 const CONGRATS = ['Excellent ! 🎯', 'Parfait ! ✨', 'Bien joue ! 👏', 'Super ! 🌟', 'Bravo ! 🎉']
-const WRONG_TIMER_SECONDS = 20  // secondes de réflexion forcée après une mauvaise réponse
+const WRONG_TIMER_SECONDS = 30  // secondes de réflexion forcée après une mauvaise réponse (optimal selon recherche mémoire de travail)
 
 export default function SessionPage({
   params,
