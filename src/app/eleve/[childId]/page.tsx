@@ -160,8 +160,16 @@ export default async function EleveDashboardPage({
     ? Math.round(practiced.reduce((a, s) => a + (s.mastery ?? 0), 0) / practiced.length * 100)
     : null
 
-  const recommended = allSkills.filter(s => s.mastery !== null)
-    .sort((a, b) => (a.mastery ?? 1) - (b.mastery ?? 1))[0] ?? allSkills[0]
+  // Priorité 1 : skill en cours (mastery < 0.90) — le plus proche de la maîtrise
+  // Priorité 2 : premier skill non commencé (mastery === null) — prochaine étape logique
+  // Priorité 3 : fallback — skill maîtrisé avec la maîtrise la plus basse (révision)
+  const recommended =
+    allSkills.filter(s => s.mastery !== null && s.mastery < 0.90)
+             .sort((a, b) => (b.mastery ?? 0) - (a.mastery ?? 0))[0]
+    ?? allSkills.find(s => s.mastery === null)
+    ?? allSkills.filter(s => s.mastery !== null)
+                .sort((a, b) => (a.mastery ?? 1) - (b.mastery ?? 1))[0]
+    ?? allSkills[0]
 
   const skillsBySubject: Record<string, typeof allSkills> = {}
   for (const s of allSkills) {
