@@ -65,6 +65,54 @@ function storageKey(childId: string, skillId: string) {
 const CONGRATS = ['Excellent ! 🎯', 'Parfait ! ✨', 'Bien joue ! 👏', 'Super ! 🌟', 'Bravo ! 🎉']
 const WRONG_TIMER_SECONDS = 30  // secondes de réflexion forcée après une mauvaise réponse (optimal selon recherche mémoire de travail)
 
+// ── Boîte mystère ──────────────────────────────────────────────────────────
+type Collectible = { emoji: string; name: string; rarity: 'Commun' | 'Rare' | 'Épique' | 'Légendaire'; color: string }
+
+const COLLECTIBLES: Collectible[] = [
+  // Commun (50 %)
+  { emoji: '🌟', name: 'Étoile dorée',      rarity: 'Commun',    color: '#f59e0b' },
+  { emoji: '🌈', name: 'Arc-en-ciel',        rarity: 'Commun',    color: '#10b981' },
+  { emoji: '🐼', name: 'Panda doux',          rarity: 'Commun',    color: '#64748b' },
+  { emoji: '🎯', name: 'Tir parfait',         rarity: 'Commun',    color: '#6366f1' },
+  { emoji: '🎪', name: 'Chapeau magique',     rarity: 'Commun',    color: '#8b5cf6' },
+  { emoji: '🍀', name: 'Trèfle chanceux',     rarity: 'Commun',    color: '#22c55e' },
+  { emoji: '🐢', name: 'Tortue sage',         rarity: 'Commun',    color: '#16a34a' },
+  { emoji: '🦊', name: 'Renard curieux',      rarity: 'Commun',    color: '#f97316' },
+  // Rare (30 %)
+  { emoji: '🦋', name: 'Papillon rare',       rarity: 'Rare',      color: '#8b5cf6' },
+  { emoji: '🦚', name: 'Paon majestueux',     rarity: 'Rare',      color: '#0d9488' },
+  { emoji: '🦁', name: 'Lion courageux',      rarity: 'Rare',      color: '#f97316' },
+  { emoji: '⚡', name: 'Éclair de pouvoir',   rarity: 'Rare',      color: '#eab308' },
+  { emoji: '🔮', name: 'Boule de cristal',    rarity: 'Rare',      color: '#7c3aed' },
+  { emoji: '🌊', name: 'Vague de l\'océan',   rarity: 'Rare',      color: '#0ea5e9' },
+  // Épique (15 %)
+  { emoji: '🦄', name: 'Licorne magique',     rarity: 'Épique',    color: '#ec4899' },
+  { emoji: '👑', name: 'Couronne royale',     rarity: 'Épique',    color: '#f59e0b' },
+  { emoji: '💎', name: 'Diamant précieux',    rarity: 'Épique',    color: '#06b6d4' },
+  { emoji: '🏆', name: 'Trophée d\'or',       rarity: 'Épique',    color: '#f59e0b' },
+  // Légendaire (5 %)
+  { emoji: '🐉', name: 'Dragon légendaire',   rarity: 'Légendaire', color: '#ef4444' },
+  { emoji: '✨', name: 'Étoile filante',       rarity: 'Légendaire', color: '#a855f7' },
+  { emoji: '🌙', name: 'Lune mystique',        rarity: 'Légendaire', color: '#6366f1' },
+]
+
+const RARITY_COLORS: Record<Collectible['rarity'], string> = {
+  'Commun':    '#6b7280',
+  'Rare':      '#3b82f6',
+  'Épique':    '#8b5cf6',
+  'Légendaire':'#f59e0b',
+}
+
+function drawCollectible(): Collectible {
+  const rng = Math.random()
+  let pool: Collectible[]
+  if      (rng < 0.05) pool = COLLECTIBLES.filter(c => c.rarity === 'Légendaire')
+  else if (rng < 0.20) pool = COLLECTIBLES.filter(c => c.rarity === 'Épique')
+  else if (rng < 0.50) pool = COLLECTIBLES.filter(c => c.rarity === 'Rare')
+  else                  pool = COLLECTIBLES.filter(c => c.rarity === 'Commun')
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
 export default function SessionPage({
   params,
 }: {
@@ -92,6 +140,9 @@ export default function SessionPage({
   const [showHint, setShowHint] = useState(false)
   // Timer pédagogique : force la lecture de l'explication après une mauvaise réponse
   const [wrongTimer, setWrongTimer] = useState(0)
+  // Boîte mystère
+  const [boxState, setBoxState] = useState<'closed' | 'shaking' | 'open'>('closed')
+  const [collectible, setCollectible] = useState<Collectible | null>(null)
   // Remontée graduelle : géré côté SQL dans get_questions_for_skill (difficulty_level progressif)
 
   const startTimeRef = useRef<number>(Date.now())
@@ -164,6 +215,15 @@ export default function SessionPage({
     init()
   }, [childId, skillId])
 
+  function openBox() {
+    if (boxState !== 'closed') return
+    setBoxState('shaking')
+    setTimeout(() => {
+      setCollectible(drawCollectible())
+      setBoxState('open')
+    }, 950)
+  }
+
   async function handleAnswer(option: string) {
     if (revealed) return
     setSelected(option)
@@ -178,7 +238,7 @@ export default function SessionPage({
       setXpBarGlow(true)
       setTimeout(() => setXpBarGlow(false), 600)
       setShowXpPop(true)
-      setTimeout(() => setShowXpPop(false), 1200)
+      setTimeout(() => setShowXpPop(false), 2500)
       // Bonne réponse : réinitialiser les échecs qualifiés
       qualifiedFailures.current = 0
       setShowHint(false)
@@ -342,6 +402,55 @@ export default function SessionPage({
                 </div>
               </div>
             )}
+            {/* ── Boîte mystère ───────────────────────────────────── */}
+            <div className="mb-4">
+              {boxState === 'closed' && (
+                <button
+                  onClick={openBox}
+                  className="w-full rounded-2xl py-4 flex flex-col items-center gap-1 border-2 border-dashed border-amber-300 bg-amber-50 hover:bg-amber-100 active:scale-95 transition-all"
+                >
+                  <span className="text-4xl" style={{ filter: 'drop-shadow(0 2px 6px rgba(245,158,11,0.4))' }}>🎁</span>
+                  <span className="text-sm font-bold text-amber-700">Ouvre ta boîte surprise !</span>
+                  <span className="text-xs text-amber-500">Tu as gagné une récompense mystère</span>
+                </button>
+              )}
+
+              {boxState === 'shaking' && (
+                <div className="w-full rounded-2xl py-4 flex flex-col items-center gap-2 border-2 border-dashed border-amber-300 bg-amber-50">
+                  <span className="text-5xl" style={{ animation: 'box-shake 0.95s ease-in-out forwards', display: 'inline-block' }}>🎁</span>
+                  <span className="text-xs font-semibold text-amber-600 animate-pulse">En train d'ouvrir...</span>
+                </div>
+              )}
+
+              {boxState === 'open' && collectible && (
+                <div
+                  className="w-full rounded-2xl py-5 flex flex-col items-center gap-2 border-2"
+                  style={{
+                    borderColor: RARITY_COLORS[collectible.rarity],
+                    background: `${RARITY_COLORS[collectible.rarity]}18`,
+                  }}
+                >
+                  <span
+                    className="text-6xl"
+                    style={{
+                      display: 'inline-block',
+                      animation: 'box-reveal 0.65s cubic-bezier(0.34,1.56,0.64,1) forwards',
+                      filter: `drop-shadow(0 4px 12px ${collectible.color}80)`,
+                    }}
+                  >
+                    {collectible.emoji}
+                  </span>
+                  <p className="text-sm font-bold text-gray-800 mt-1">{collectible.name}</p>
+                  <span
+                    className="text-xs font-bold px-3 py-1 rounded-full text-white"
+                    style={{ background: RARITY_COLORS[collectible.rarity] }}
+                  >
+                    {collectible.rarity}
+                  </span>
+                </div>
+              )}
+            </div>
+
             {/* Revoir les erreurs */}
             {results.correct < results.total && (
               <button
@@ -381,7 +490,7 @@ export default function SessionPage({
 
       {showXpPop && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-40 font-bold text-lg pointer-events-none"
-          style={{ color: '#f59e0b', animation: 'xp-pop 1.1s ease-out forwards' }}>
+          style={{ color: '#f59e0b', animation: 'xp-pop 2.5s ease-in-out forwards' }}>
           +{XP_PER_CORRECT} XP ✨
         </div>
       )}
