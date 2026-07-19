@@ -45,3 +45,24 @@ body {
   0%, 100% { transform: scale(1); }
   50%      { transform: scale(1.12); }
 }
+
+/* ── Parcours élève — animations prouvées pour 6-12 ans ──────────── */
+
+/* Rebond périodique pour le nœud recommandé (plus engageant que le pulse continu) */
+@keyframes skill-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%           { transform: translateY(-9px); }
+  45%           { transform: translateY(-4px); }
+}
+
+/* Halo vert pulsant — renforcement visuel de la réussite */
+@keyframes glow-green {
+  0%, 100% { box-shadow: 0 0 6px 2px rgba(16, 185, 129, 0.25), 0 4px 10px rgba(16, 185, 129, 0.15); }
+  50%      { box-shadow: 0 0 14px 4px rgba(16, 185, 129, 0.45), 0 4px 18px rgba(16, 185, 129, 0.30); }
+}
+
+/* Halo or pulsant + rebond — signal "ta prochaine étape" */
+@keyframes glow-gold {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.70), 0 4px 14px rgba(245, 158, 11, 0.30); }
+  50%      { box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.25), 0 4px 24px rgba(245, 158, 11, 0.55); }
+}

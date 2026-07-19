@@ -405,12 +405,12 @@ export default async function EleveDashboardPage({
                         const isMasteredOrAdv = state === 'mastered' || state === 'advanced'
 
                         const bgStyle: Record<SkillState, string> = {
-                          mastered:   'bg-green-500 border-green-300 text-white',
-                          advanced:   'bg-emerald-400 border-emerald-300 text-white',
-                          inprogress: 'bg-indigo-500 border-indigo-300 text-white',
-                          new:        'bg-white border-indigo-300 text-indigo-400',
-                          bkt:        'bg-gray-100 border-gray-200 text-gray-300',
-                          premium:    'bg-amber-50 border-amber-200 text-amber-300',
+                          mastered:   'bg-gradient-to-br from-green-400 to-emerald-500 border-green-300 text-white',
+                          advanced:   'bg-gradient-to-br from-emerald-300 to-teal-500 border-emerald-200 text-white',
+                          inprogress: 'bg-gradient-to-br from-indigo-400 to-violet-500 border-indigo-300 text-white',
+                          new:        'bg-gradient-to-br from-slate-50 to-indigo-50 border-indigo-200 text-indigo-400',
+                          bkt:        'bg-slate-100 border-slate-200 text-slate-300',
+                          premium:    'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200 text-amber-400',
                         }
                         const icons: Record<SkillState, string> = {
                           mastered:   '⭐⭐⭐',
@@ -454,20 +454,22 @@ export default async function EleveDashboardPage({
                           <div className="flex items-center justify-center gap-3">
                             {isLeft ? textBlock : emptySlot}
 
-                            {/* Nœud */}
-                            <div className={`relative w-14 h-14 rounded-full border-4 flex items-center justify-center shadow-md flex-shrink-0 transition-transform
-                              ${bgStyle[state]}
-                              ${isRecommended && !isLocked ? 'ring-4 ring-indigo-200 ring-offset-2 scale-110' : ''}
-                            `}>
-                              <span className="text-sm leading-none select-none">{icons[state]}</span>
-                              {/* Pulse pour la compétence recommandée */}
-                              {isRecommended && !isLocked && (
-                                <div className="absolute inset-0 rounded-full animate-ping bg-indigo-300 opacity-25" />
-                              )}
+                            {/* Nœud — 64px pour meilleure cible tactile (Nielsen Norman, 6-12 ans) */}
+                            <div
+                              className={`relative w-16 h-16 rounded-full border-4 flex items-center justify-center shadow-md flex-shrink-0 transition-all ${bgStyle[state]}`}
+                              style={
+                                isRecommended && !isLocked
+                                  ? { animation: 'skill-bounce 2.5s ease-in-out infinite, glow-gold 2s ease-in-out infinite' }
+                                  : isMasteredOrAdv
+                                  ? { animation: 'glow-green 2.5s ease-in-out infinite' }
+                                  : undefined
+                              }
+                            >
+                              <span className="text-base leading-none select-none">{icons[state]}</span>
                               {/* Badge ✓ pour les compétences maîtrisées */}
                               {isMasteredOrAdv && (
-                                <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-green-500 border-2 border-white flex items-center justify-center">
-                                  <span className="text-white font-black" style={{ fontSize: 9 }}>✓</span>
+                                <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-green-500 border-2 border-white flex items-center justify-center">
+                                  <span className="text-white font-black" style={{ fontSize: 10 }}>✓</span>
                                 </div>
                               )}
                             </div>
@@ -491,7 +493,7 @@ export default async function EleveDashboardPage({
                             {/* Ligne de connexion vers le prochain nœud */}
                             {!isLast && (
                               <div className="flex justify-center py-0.5">
-                                <div className="w-0.5 h-5 rounded-full transition-colors"
+                                <div className="w-0.5 h-7 rounded-full transition-colors"
                                   style={{ backgroundColor: isMasteredOrAdv ? '#6ee7b7' : '#e5e7eb' }} />
                               </div>
                             )}
