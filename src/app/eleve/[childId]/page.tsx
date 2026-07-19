@@ -469,7 +469,7 @@ export default async function EleveDashboardPage({
                                 isRecommended && !isLocked
                                   ? {
                                       animation: 'skill-bounce 2.5s ease-in-out infinite',
-                                      outline: '4px solid #f59e0b',
+                                      outline: '4px solid #eab308',
                                       outlineOffset: '4px',
                                     }
                                   : isMasteredOrAdv
