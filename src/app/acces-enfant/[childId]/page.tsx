@@ -53,8 +53,10 @@ export default function AccesEnfantPage({
         return
       }
 
-      // Échanger le token Supabase contre une session côté client
+      // Déconnecter toute session parent active avant de connecter l'enfant
       const supabase = createClient()
+      await supabase.auth.signOut()
+
       const { error: otpErr } = await supabase.auth.verifyOtp({
         token_hash: data.token_hash,
         type: data.type ?? 'magiclink',
