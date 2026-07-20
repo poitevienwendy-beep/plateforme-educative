@@ -43,7 +43,9 @@ export async function POST(request: Request) {
     }
 
     const admin = createAdminClient()
-    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL}/api/children/link-account?child_id=${child_id}`
+    // Page CLIENT qui lit le #access_token du fragment URL et lie le compte
+    // (une route serveur ne peut pas lire les fragments URL)
+    const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL}/acces-enfant/setup/${child_id}`
 
     // Générer le lien d'invitation sans envoyer l'email Supabase
     // type 'invite' crée le compte + retourne action_link sans email automatique
